@@ -66,4 +66,6 @@ Route::get('/import-santri', function () {
     return "✅ Import selesai! Jumlah data masuk: {$count}";
 });
 
+Route::get('/rekap-data', [AbsensiController::class, 'rekapData'])->name('rekap.data');
+
 require __DIR__.'/auth.php';

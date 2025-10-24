@@ -32,13 +32,12 @@ class AbsensiController extends Controller
         $today = $now->toDateString();
         $time = $now->format('H:i:s');
 
-        // ✅ Ambil jadwal kegiatan dari database berdasarkan waktu WIB sekarang
+        // ✅ Cek jadwal kegiatan sesuai waktu saat ini
         $jadwal = JadwalAbsen::where('jam_mulai', '<=', $time)
             ->where('jam_selesai', '>=', $time)
             ->orderBy('jam_mulai')
             ->first();
 
-        // ✅ Kalau di luar jam kegiatan
         if (!$jadwal) {
             return response()->json([
                 'message' => 'Bukan waktu absensi!',
@@ -49,7 +48,7 @@ class AbsensiController extends Controller
             ], 200);
         }
 
-        // ✅ Cek apakah sudah absen untuk kegiatan ini
+        // ✅ Cek apakah sudah absen untuk kegiatan ini di hari yang sama
         $sudahAbsen = Absensi::where('nis', $santri->nis)
             ->where('jadwal_id', $jadwal->id)
             ->whereDate('waktu', $today)
@@ -65,13 +64,13 @@ class AbsensiController extends Controller
             ]);
         }
 
-        // ✅ Simpan absensi baru (dengan referensi ke jadwal)
+        // ✅ Simpan absensi baru (kegiatan sesuai jadwal)
         $absen = Absensi::create([
             'nis' => $santri->nis,
             'jadwal_id' => $jadwal->id,
             'status' => 'Hadir',
             'kegiatan' => $jadwal->nama_kegiatan,
-            'waktu' => now(),
+            'waktu' => $now,
         ]);
 
         return response()->json([
@@ -83,13 +82,40 @@ class AbsensiController extends Controller
         ]);
     }
 
-    public function rekap()
+    // ✅ Halaman utama rekap (untuk tampilan Blade)
+    public function rekap(Request $request)
     {
-        $rekap = Absensi::with('santri')
-            ->whereDate('waktu', now())
+        $tanggal = $request->input('tanggal', now()->toDateString());
+        $search = $request->input('search');
+
+        $rekap = Absensi::with(['santri', 'jadwal'])
+            ->whereDate('waktu', $tanggal)
+            ->when($search, function ($query, $search) {
+                $query->where('nis', 'like', "%{$search}%")
+                      ->orWhereHas('santri', fn($q) => $q->where('nama', 'like', "%{$search}%"));
+            })
             ->orderBy('waktu', 'desc')
             ->get();
 
         return view('rekap', compact('rekap'));
     }
+
+    // ✅ Untuk fetch data realtime (AJAX di halaman rekap)
+    public function rekapData(Request $request)
+    {
+        $tanggal = $request->input('tanggal', now()->toDateString());
+        $search = $request->input('search');
+
+        $rekap = Absensi::with('santri')
+            ->whereDate('waktu', $tanggal)
+            ->when($search, function ($query, $search) {
+                $query->where('nis', 'like', "%{$search}%")
+                    ->orWhereHas('santri', fn($q) => $q->where('nama', 'like', "%{$search}%"));
+            })
+            ->orderBy('waktu', 'desc')
+            ->get();
+
+        return view('partials.rekap-table', compact('rekap'));
+    }
+
 }

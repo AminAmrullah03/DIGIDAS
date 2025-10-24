@@ -1,15 +1,12 @@
 <x-app-layout>
     <div class="min-h-screen bg-gray-100 dark:bg-gray-900 py-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl overflow-hidden transition border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 transition">
                 <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                             📋 Rekap Absensi Santri
                         </h1>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                            {{ now()->setTimezone('Asia/Jakarta')->translatedFormat('l, d F Y') }}
-                        </p>
                     </div>
                     <a href="/dashboard" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -19,107 +16,85 @@
                     </a>
                 </div>
 
-                <div class="p-6">
-                    @if ($rekap->isEmpty())
-                        <div class="text-center py-16">
-                            <div class="mx-auto mb-3 w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Belum ada absensi hari ini</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Data akan muncul setelah santri melakukan absen.</p>
-                        </div>
-                    @else
-                    <div class="space-y-6">
-                        <div class="hidden md:block overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 shadow">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead class="bg-gray-50 dark:bg-gray-700">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-300">No</th>
-                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-300">NIS</th>
-                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-300">Nama</th>
-                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-300">Kelas</th>
-                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-300">Kegiatan</th>
-                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-300">Waktu (WIB)</th>
-                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-300">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                                    @foreach ($rekap as $i => $a)
-                                        @php
-                                            $status = strtolower($a->status ?? '');
-                                            $badge = match (true) {
-                                                str_contains($status, 'hadir') => 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
-                                                str_contains($status, 'izin') => 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
-                                                str_contains($status, 'alpha') => 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
-                                                default => 'bg-slate-100 text-slate-800 dark:bg-slate-900/40 dark:text-slate-200'
-                                            };
+                <div class="p-6" x-data="{ loading: false }">
+                    <!-- Filter Section -->
+                    <div class="mb-6 flex flex-wrap items-center gap-3">
+                        <input type="date" id="tanggal"
+                            value="{{ now()->format('Y-m-d') }}"
+                            class="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-3 py-2 focus:ring-2 focus:ring-blue-500">
 
-                                            $waktu = \Carbon\Carbon::parse($a->waktu)
-                                                ->setTimezone('Asia/Jakarta')
-                                                ->format('H:i:s');
-                                        @endphp
+                        <input type="text" id="search" placeholder="Cari nama atau NIS..."
+                            class="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-4 py-2 pl-10 w-64 focus:ring-2 focus:ring-blue-500"
+                            style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke-width=\'1.5\' stroke=\'gray\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M21 21l-4.35-4.35M9.5 17A7.5 7.5 0 109.5 2a7.5 7.5 0 000 15z\'/></svg>'); background-repeat: no-repeat; background-position: 10px center; background-size: 18px;">
 
-                                        <tr class="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-800 dark:even:bg-gray-700 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition">
-                                            <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{{ $i + 1 }}</td>
-                                            <td class="px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-100">{{ $a->nis }}</td>
-                                            <td class="px-4 py-3 text-sm text-gray-800 dark:text-gray-100">{{ $a->santri->nama ?? '-' }}</td>
-                                            <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{{ $a->santri->kelas ?? '-' }}</td>
-                                            <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{{ $a->kegiatan ?? '-' }}</td>
-                                            <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{{ $waktu }}</td>
-                                            <td class="px-4 py-3">
-                                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {{ $badge }}">
-                                                    {{ ucfirst($a->status ?? '-') }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="md:hidden space-y-3">
-                            @foreach ($rekap as $i => $a)
-                                @php
-                                    $status = strtolower($a->status ?? '');
-                                    $badge = match (true) {
-                                        str_contains($status, 'hadir') => 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
-                                        str_contains($status, 'izin') => 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
-                                        str_contains($status, 'alpha') => 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
-                                        default => 'bg-slate-100 text-slate-800 dark:bg-slate-900/40 dark:text-slate-200'
-                                    };
-
-                                    $waktu = \Carbon\Carbon::parse($a->waktu)
-                                        ->setTimezone('Asia/Jakarta')
-                                        ->format('H:i:s');
-                                @endphp
-
-                                <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
-                                    <div class="flex items-start justify-between gap-3">
-                                        <div>
-                                            <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $a->santri->nama ?? '-' }}</div>
-                                            <div class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">NIS {{ $a->nis }} • {{ $a->santri->kelas ?? '-' }}</div>
-                                        </div>
-                                        <span class="shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {{ $badge }}">{{ ucfirst($a->status ?? '-') }}</span>
-                                    </div>
-                                    <div class="mt-3 grid grid-cols-2 gap-3 text-xs">
-                                        <div class="rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2">
-                                            <div class="text-gray-500 dark:text-gray-400">Kegiatan</div>
-                                            <div class="mt-0.5 font-medium text-gray-800 dark:text-gray-100">{{ $a->kegiatan ?? '-' }}</div>
-                                        </div>
-                                        <div class="rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2">
-                                            <div class="text-gray-500 dark:text-gray-400">Waktu (WIB)</div>
-                                            <div class="mt-0.5 font-medium text-gray-800 dark:text-gray-100">{{ $waktu }}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
+                        <button id="resetBtn" class="px-3 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                            Reset
+                        </button>
                     </div>
-                    @endif
+
+                    <!-- Loading indicator -->
+                    <div id="loading" class="hidden text-center py-10 text-gray-500 dark:text-gray-300">
+                        <svg class="animate-spin h-6 w-6 inline-block mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
+                        Memuat data...
+                    </div>
+
+                    <!-- Table container -->
+                    <div id="rekap-container">
+                        @include('partials.rekap-table', ['rekap' => $rekap])
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+    const search = document.getElementById('search');
+    const tanggal = document.getElementById('tanggal');
+    const rekapContainer = document.getElementById('rekap-container');
+    const loading = document.getElementById('loading');
+    const resetBtn = document.getElementById('resetBtn');
+
+    let typingTimer;
+    const delay = 500; // waktu tunggu setelah berhenti mengetik (ms)
+
+    // Fetch data dari server tanpa reload
+    async function fetchRekap() {
+        loading.classList.remove('hidden');
+        rekapContainer.innerHTML = '';
+
+        const query = new URLSearchParams({
+            tanggal: tanggal.value,
+            search: search.value
+        }).toString();
+
+        try {
+            const res = await fetch(`/rekap-data?${query}`);
+            const html = await res.text();
+            rekapContainer.innerHTML = html;
+        } catch (err) {
+            rekapContainer.innerHTML = `<div class='text-center text-red-500 py-6'>Gagal memuat data!</div>`;
+        } finally {
+            loading.classList.add('hidden');
+        }
+    }
+
+    // Event listener pencarian realtime
+    search.addEventListener('input', () => {
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(fetchRekap, delay);
+    });
+
+    // Event listener perubahan tanggal
+    tanggal.addEventListener('change', fetchRekap);
+
+    // Reset filter
+    resetBtn.addEventListener('click', () => {
+        search.value = '';
+        tanggal.value = new Date().toISOString().split('T')[0];
+        fetchRekap();
+    });
+    </script>
 </x-app-layout>

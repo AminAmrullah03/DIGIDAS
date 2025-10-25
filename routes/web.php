@@ -6,7 +6,10 @@ use Illuminate\Support\Facades\Route;
 use App\Models\Santri;
 
 Route::get('/', function () {
-    return view('dashboard');
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+    return redirect()->route('login');
 });
 
 // Dashboard

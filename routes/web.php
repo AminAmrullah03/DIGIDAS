@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AbsensiController;
+use App\Http\Controllers\Admin\JadwalAbsenController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Santri;
 
@@ -31,6 +32,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // ✅ Jadwal Absen
+    Route::prefix('jadwal')->as('jadwal.')->group(function () {
+        Route::get('/', [JadwalAbsenController::class, 'index'])->name('index');
+        Route::get('/create', [JadwalAbsenController::class, 'create'])->name('create');
+        Route::post('/', [JadwalAbsenController::class, 'store'])->name('store');
+        Route::get('/{jadwalAbsen}/edit', [JadwalAbsenController::class, 'edit'])->name('edit');
+        Route::put('/{jadwalAbsen}', [JadwalAbsenController::class, 'update'])->name('update');
+        Route::delete('/{jadwalAbsen}', [JadwalAbsenController::class, 'destroy'])->name('destroy');
+        Route::post('/{jadwalAbsen}/toggle', [JadwalAbsenController::class, 'toggleAktif'])->name('toggle');
+    });
 });
 
 // ✅ Import CSV santri (sementara, nanti bisa dipindah ke controller)

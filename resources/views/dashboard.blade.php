@@ -26,6 +26,10 @@
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path d="M3 5a2 2 0 0 1 2-2h2V1h2v2h4V1h2v2h2a2 2 0 0 1 2 2v2H3V5Zm0 4h18v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Zm4 3v2h6v-2H7Zm0 4v2h10v-2H7Z"/></svg>
                             <span>Lihat Rekap Absensi</span>
                         </a>
+                        <a href="/jadwal" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition transform hover:-translate-y-0.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path d="M5 3a2 2 0 0 0-2 2v13a1 1 0 0 0 1.447.894L8 18.118l3.553 1.776a1 1 0 0 0 .894 0L16 18.118l3.553 1.776A1 1 0 0 0 21 18V5a2 2 0 0 0-2-2H5Zm2 4h10v2H7V7Zm0 4h6v2H7v-2Z"/></svg>
+                            <span>Kelola Jadwal Absen</span>
+                        </a>
                     </div>
                 </div>
             </div>

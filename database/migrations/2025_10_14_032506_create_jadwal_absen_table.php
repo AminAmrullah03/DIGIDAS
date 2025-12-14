@@ -10,10 +10,14 @@ return new class extends Migration
     {
         Schema::create('jadwal_absen', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_kegiatan');
+            $table->string('nama_kegiatan', 120);
             $table->time('jam_mulai');
             $table->time('jam_selesai');
+            $table->string('kode', 50)->nullable()->index();
+            $table->text('keterangan')->nullable();
+            $table->boolean('aktif')->default(true);
             $table->timestamps();
+            $table->index(['jam_mulai', 'jam_selesai']);
         });
 
         // Tambahkan kolom jadwal_id ke tabel absensi

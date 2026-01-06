@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AbsensiController;
-use App\Http\Controllers\WaliRekapController;
 use App\Http\Controllers\Admin\JadwalAbsenController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Santri;
@@ -13,18 +12,6 @@ Route::get('/', function () {
     }
     return redirect()->route('login');
 });
-
-// ✅ Route khusus wali santri (akses hanya dari domain wali)
-// Penting: harus didaftarkan sebelum route /rekap umum agar tidak ketiban.
-$waliDomain = trim(explode(',', (string) env('WALI_DOMAIN', ''))[0] ?? '');
-if ($waliDomain !== '') {
-    Route::domain($waliDomain)
-        ->middleware(['auth', 'wali.domain'])
-        ->group(function () {
-            Route::get('/rekap', [WaliRekapController::class, 'index'])->name('wali.rekap');
-            Route::get('/rekap-data', [WaliRekapController::class, 'data'])->name('wali.rekap.data');
-        });
-}
 
 // Dashboard
 Route::get('/dashboard', function () {
@@ -40,7 +27,6 @@ Route::middleware(['auth'])->group(function () {
 
     // ✅ Halaman Rekap
     Route::get('/rekap', [AbsensiController::class, 'rekap'])->name('rekap');
-    Route::get('/rekap-data', [AbsensiController::class, 'rekapData'])->name('rekap.data');
 
     // ✅ Halaman Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -94,5 +80,7 @@ Route::get('/import-santri', function () {
     fclose($file);
     return "✅ Import selesai! Jumlah data masuk: {$count}";
 });
+
+Route::get('/rekap-data', [AbsensiController::class, 'rekapData'])->name('rekap.data');
 
 require __DIR__.'/auth.php';

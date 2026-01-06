@@ -36,6 +36,22 @@
                                 <input type="time" name="jam_selesai" value="{{ old('jam_selesai', substr($jadwal->jam_selesai,0,5)) }}" class="w-full rounded border-gray-300 dark:bg-gray-900 dark:border-gray-700" required>
                             </div>
                         </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Hari (opsional)</label>
+                            @php($selectedDays = (array)old('hari', $jadwal->hari ?? []))
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                @php($days = [1=>'Senin',2=>'Selasa',3=>'Rabu',4=>'Kamis',5=>'Jumat',6=>'Sabtu',7=>'Minggu'])
+                                @foreach($days as $k => $label)
+                                    <label class="inline-flex items-center gap-2 px-3 py-2 rounded border border-gray-300 dark:border-gray-700">
+                                        <input type="checkbox" name="hari[]" value="{{ $k }}" class="rounded border-gray-300 dark:bg-gray-900 dark:border-gray-700" {{ in_array($k, $selectedDays) ? 'checked' : '' }}>
+                                        <span class="text-sm">{{ $label }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            <div class="mt-1 text-xs text-gray-500">
+                                Jika tidak dipilih, jadwal berlaku setiap hari.
+                            </div>
+                        </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium mb-1">Kode (opsional)</label>

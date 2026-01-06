@@ -12,6 +12,7 @@ class JadwalAbsen extends Model
         'nama_kegiatan',
         'jam_mulai',
         'jam_selesai',
+        'hari',
         'kode',
         'keterangan',
         'aktif',
@@ -19,6 +20,7 @@ class JadwalAbsen extends Model
 
     protected $casts = [
         'aktif' => 'boolean',
+        'hari' => 'array',
     ];
 
     public function absensis()

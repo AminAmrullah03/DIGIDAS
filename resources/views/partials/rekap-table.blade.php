@@ -1,14 +1,39 @@
-@if ($rekap->isEmpty())
+@php
+    $tanggal = $tanggal ?? now()->toDateString();
+    $rows = $rows ?? collect();
+    $summary = $summary ?? ['total' => 0, 'hadir' => 0, 'bolos' => 0];
+    $kegiatanBerlaku = $kegiatanBerlaku ?? false;
+@endphp
+
+@if (!$jadwal)
     <div class="text-center py-16">
         <div class="mx-auto mb-3 w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
         </div>
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Tidak ada data absensi</h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400">Coba ubah tanggal atau pencarian.</p>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Pilih kegiatan dan kelas</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Agar rekap bisa menampilkan seluruh santri dan siapa yang bolos.</p>
     </div>
 @else
+    <div class="mb-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div class="text-xs text-gray-500 dark:text-gray-400">Total Santri</div>
+            <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $summary['total'] ?? 0 }}</div>
+        </div>
+        <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div class="text-xs text-gray-500 dark:text-gray-400">Hadir</div>
+            <div class="text-2xl font-bold text-green-700 dark:text-green-300">{{ $summary['hadir'] ?? 0 }}</div>
+        </div>
+        <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div class="text-xs text-gray-500 dark:text-gray-400">Bolos / Belum Absen</div>
+            <div class="text-2xl font-bold {{ ($kegiatanBerlaku ?? false) ? 'text-red-700 dark:text-red-300' : 'text-gray-400' }}">{{ $summary['bolos'] ?? 0 }}</div>
+            @if(!($kegiatanBerlaku ?? false))
+                <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">Tidak dihitung karena kegiatan tidak berlaku pada tanggal ini.</div>
+            @endif
+        </div>
+    </div>
+
     <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 shadow">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-700">
@@ -23,32 +48,43 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                @foreach ($rekap as $i => $a)
-                    @php
-                        $status = strtolower($a->status ?? '');
-                        $badge = match (true) {
-                            str_contains($status, 'hadir') => 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
-                            str_contains($status, 'izin') => 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
-                            str_contains($status, 'alpha') => 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
-                            default => 'bg-slate-100 text-slate-800 dark:bg-slate-900/40 dark:text-slate-200'
-                        };
-
-                        $waktu = \Carbon\Carbon::parse($a->waktu)->setTimezone('Asia/Jakarta')->format('H:i:s');
-                    @endphp
-                    <tr class="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-800 dark:even:bg-gray-700 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition">
-                        <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{{ $i + 1 }}</td>
-                        <td class="px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-100">{{ $a->nis }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-800 dark:text-gray-100">{{ $a->santri->nama ?? '-' }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{{ $a->santri->kelas ?? '-' }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{{ $a->kegiatan ?? '-' }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{{ $waktu }}</td>
-                        <td class="px-4 py-3">
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {{ $badge }}">
-                                {{ ucfirst($a->status ?? '-') }}
-                            </span>
-                        </td>
+                @if($rows->isEmpty())
+                    <tr>
+                        <td colspan="7" class="px-4 py-10 text-center text-gray-500">Tidak ada santri untuk filter ini.</td>
                     </tr>
-                @endforeach
+                @else
+                    @foreach ($rows as $i => $r)
+                        @php
+                            $s = $r['santri'];
+                            $a = $r['absensi'];
+                            $isHadir = !empty($a);
+                            $statusLabel = $isHadir ? ($a->status ?? 'Hadir') : 'Bolos';
+                            $status = strtolower($statusLabel);
+                            $badge = match (true) {
+                                str_contains($status, 'hadir') => 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
+                                str_contains($status, 'izin') => 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
+                                str_contains($status, 'alpha') => 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
+                                str_contains($status, 'bolos') => 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
+                                default => 'bg-slate-100 text-slate-800 dark:bg-slate-900/40 dark:text-slate-200'
+                            };
+
+                            $waktu = $isHadir ? \Carbon\Carbon::parse($a->waktu)->setTimezone('Asia/Jakarta')->format('H:i:s') : '-';
+                        @endphp
+                        <tr class="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-800 dark:even:bg-gray-700 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition">
+                            <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{{ $i + 1 }}</td>
+                            <td class="px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-100">{{ $s->nis }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-800 dark:text-gray-100">{{ $s->nama ?? '-' }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{{ $s->kelas ?? '-' }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{{ $r['kegiatan'] ?? '-' }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{{ $waktu }}</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {{ $badge }}">
+                                    {{ ucfirst($statusLabel) }}
+                                </span>
+                            </td>
+                        </tr>
+                    @endforeach
+                @endif
             </tbody>
         </table>
     </div>

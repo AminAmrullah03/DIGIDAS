@@ -38,6 +38,7 @@
                                 <tr>
                                     <th class="px-3 py-2 text-left font-semibold">Nama Kegiatan</th>
                                     <th class="px-3 py-2 text-left font-semibold">Jam</th>
+                                    <th class="px-3 py-2 text-left font-semibold">Hari</th>
                                     <th class="px-3 py-2 text-left font-semibold">Kode</th>
                                     <th class="px-3 py-2 text-left font-semibold">Aktif</th>
                                     <th class="px-3 py-2 text-right font-semibold">Aksi</th>
@@ -48,6 +49,14 @@
                                     <tr>
                                         <td class="px-3 py-2">{{ $j->nama_kegiatan }}</td>
                                         <td class="px-3 py-2">{{ \Illuminate\Support\Str::of($j->jam_mulai)->substr(0,5) }} - {{ \Illuminate\Support\Str::of($j->jam_selesai)->substr(0,5) }}</td>
+                                        <td class="px-3 py-2">
+                                            @php($days = [1=>'Sen',2=>'Sel',3=>'Rab',4=>'Kam',5=>'Jum',6=>'Sab',7=>'Min'])
+                                            @if(empty($j->hari))
+                                                Setiap hari
+                                            @else
+                                                {{ collect($j->hari)->map(fn($d) => $days[$d] ?? $d)->implode(', ') }}
+                                            @endif
+                                        </td>
                                         <td class="px-3 py-2">{{ $j->kode ?? '-' }}</td>
                                         <td class="px-3 py-2">
                                             <button data-id="{{ $j->id }}" data-active="{{ $j->aktif ? '1':'0' }}" class="toggle-aktif px-3 py-1 rounded text-white {{ $j->aktif ? 'bg-green-600 hover:bg-green-700':'bg-gray-500 hover:bg-gray-600' }}">
@@ -65,7 +74,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="px-3 py-6 text-center text-gray-500">Belum ada jadwal.</td>
+                                        <td colspan="6" class="px-3 py-6 text-center text-gray-500">Belum ada jadwal.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('nama_kegiatan', 120);
             $table->time('jam_mulai');
             $table->time('jam_selesai');
+            $table->json('hari')->nullable();
             $table->string('kode', 50)->nullable()->index();
             $table->text('keterangan')->nullable();
             $table->boolean('aktif')->default(true);

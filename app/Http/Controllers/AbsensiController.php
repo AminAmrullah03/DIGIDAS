@@ -91,37 +91,75 @@ class AbsensiController extends Controller
     // ✅ Halaman utama rekap (untuk tampilan Blade)
     public function rekap(Request $request)
     {
-        $tanggal = $request->input('tanggal', now()->toDateString());
-        $search = $request->input('search');
+        // Ambil daftar kelas unik dari tabel santri
+        $kelasList = Santri::select('kelas')->distinct()->orderBy('kelas')->pluck('kelas');
+        
+        // Ambil daftar kegiatan dari jadwal_absen
+        $kegiatanList = JadwalAbsen::select('id', 'nama_kegiatan')->orderBy('nama_kegiatan')->get();
+        
+        // Data rekap kosong di awal (user harus pilih filter dulu)
+        $rekap = collect();
+        $showTable = false;
 
-        $rekap = Absensi::with(['santri', 'jadwal'])
-            ->whereDate('waktu', $tanggal)
-            ->when($search, function ($query, $search) {
-                $query->where('nis', 'like', "%{$search}%")
-                      ->orWhereHas('santri', fn($q) => $q->where('nama', 'like', "%{$search}%"));
-            })
-            ->orderBy('waktu', 'desc')
-            ->get();
-
-        return view('rekap', compact('rekap'));
+        return view('rekap', compact('rekap', 'kelasList', 'kegiatanList', 'showTable'));
     }
 
     // ✅ Untuk fetch data realtime (AJAX di halaman rekap)
     public function rekapData(Request $request)
     {
         $tanggal = $request->input('tanggal', now()->toDateString());
+        $kelas = $request->input('kelas');
+        $jadwalId = $request->input('kegiatan');
         $search = $request->input('search');
 
-        $rekap = Absensi::with('santri')
-            ->whereDate('waktu', $tanggal)
+        // Jika kelas dan kegiatan belum dipilih, kembalikan pesan
+        if (empty($kelas) || empty($jadwalId)) {
+            return view('partials.rekap-table', [
+                'rekap' => collect(),
+                'showTable' => false,
+                'message' => 'Silakan pilih kelas dan kegiatan terlebih dahulu.'
+            ]);
+        }
+
+        // Ambil jadwal untuk mendapatkan nama kegiatan
+        $jadwal = JadwalAbsen::find($jadwalId);
+        $namaKegiatan = $jadwal ? $jadwal->nama_kegiatan : '-';
+
+        // Ambil semua santri dari kelas yang dipilih
+        $santriList = Santri::where('kelas', $kelas)
             ->when($search, function ($query, $search) {
-                $query->where('nis', 'like', "%{$search}%")
-                    ->orWhereHas('santri', fn($q) => $q->where('nama', 'like', "%{$search}%"));
+                $query->where(function($q) use ($search) {
+                    $q->where('nis', 'like', "%{$search}%")
+                      ->orWhere('nama', 'like', "%{$search}%");
+                });
             })
-            ->orderBy('waktu', 'desc')
+            ->orderBy('nama')
             ->get();
 
-        return view('partials.rekap-table', compact('rekap'));
+        // Ambil data absensi untuk tanggal dan kegiatan yang dipilih
+        $absensiData = Absensi::where('jadwal_id', $jadwalId)
+            ->whereDate('waktu', $tanggal)
+            ->get()
+            ->keyBy('nis');
+
+        // Gabungkan data santri dengan status absensi
+        $rekap = $santriList->map(function ($santri) use ($absensiData, $namaKegiatan) {
+            $absensi = $absensiData->get($santri->nis);
+            
+            return (object) [
+                'nis' => $santri->nis,
+                'nama' => $santri->nama,
+                'kelas' => $santri->kelas,
+                'kegiatan' => $namaKegiatan,
+                'waktu' => $absensi ? $absensi->waktu : null,
+                'status' => $absensi ? $absensi->status : 'Alpha',
+            ];
+        });
+
+        return view('partials.rekap-table', [
+            'rekap' => $rekap,
+            'showTable' => true
+        ]);
     }
 
 }

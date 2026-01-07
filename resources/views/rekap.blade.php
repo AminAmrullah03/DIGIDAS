@@ -19,6 +19,22 @@
                 <div class="p-6" x-data="{ loading: false }">
                     <!-- Filter Section -->
                     <div class="mb-6 flex flex-wrap items-center gap-3">
+                        <select id="kelas"
+                            class="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                            <option value="">-- Pilih Kelas --</option>
+                            @foreach ($kelasList as $kelas)
+                                <option value="{{ $kelas }}">{{ $kelas }}</option>
+                            @endforeach
+                        </select>
+
+                        <select id="kegiatan"
+                            class="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                            <option value="">-- Pilih Kegiatan --</option>
+                            @foreach ($kegiatanList as $kegiatan)
+                                <option value="{{ $kegiatan->id }}">{{ $kegiatan->nama_kegiatan }}</option>
+                            @endforeach
+                        </select>
+
                         <input type="date" id="tanggal"
                             value="{{ now()->format('Y-m-d') }}"
                             class="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-3 py-2 focus:ring-2 focus:ring-blue-500">
@@ -51,8 +67,10 @@
     </div>
 
     <script>
-    const search = document.getElementById('search');
+    const kelas = document.getElementById('kelas');
+    const kegiatan = document.getElementById('kegiatan');
     const tanggal = document.getElementById('tanggal');
+    const search = document.getElementById('search');
     const rekapContainer = document.getElementById('rekap-container');
     const loading = document.getElementById('loading');
     const resetBtn = document.getElementById('resetBtn');
@@ -66,6 +84,8 @@
         rekapContainer.innerHTML = '';
 
         const query = new URLSearchParams({
+            kelas: kelas.value,
+            kegiatan: kegiatan.value,
             tanggal: tanggal.value,
             search: search.value
         }).toString();
@@ -87,11 +107,15 @@
         typingTimer = setTimeout(fetchRekap, delay);
     });
 
-    // Event listener perubahan tanggal
+    // Event listener perubahan filter
+    kelas.addEventListener('change', fetchRekap);
+    kegiatan.addEventListener('change', fetchRekap);
     tanggal.addEventListener('change', fetchRekap);
 
     // Reset filter
     resetBtn.addEventListener('click', () => {
+        kelas.value = '';
+        kegiatan.value = '';
         search.value = '';
         tanggal.value = new Date().toISOString().split('T')[0];
         fetchRekap();

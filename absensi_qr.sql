@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jan 05, 2026 at 12:51 AM
+-- Generation Time: Jan 07, 2026 at 04:03 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.3.9
 
@@ -48,7 +48,10 @@ INSERT INTO `absensi` (`id`, `nis`, `jadwal_id`, `waktu`, `status`, `kegiatan`, 
 (19, '250103008', 2, '2025-10-16 03:19:43', 'Hadir', 'Berangkat Sekolah', '2025-10-16 03:19:43', '2025-10-16 03:19:43'),
 (20, '250103020', 2, '2025-10-16 03:19:53', 'Hadir', 'Berangkat Sekolah', '2025-10-16 03:19:53', '2025-10-16 03:19:53'),
 (21, '250103008', 3, '2025-10-16 11:30:04', 'Hadir', 'Madin', '2025-10-16 11:30:04', '2025-10-16 11:30:04'),
-(22, '230101009', 2, '2025-12-11 05:52:15', 'Hadir', 'Berangkat Sekolah', '2025-12-11 05:52:15', '2025-12-11 05:52:15');
+(22, '230101009', 2, '2025-12-11 05:52:15', 'Hadir', 'Berangkat Sekolah', '2025-12-11 05:52:15', '2025-12-11 05:52:15'),
+(23, '250103014', 2, '2026-01-05 01:57:08', 'Hadir', 'Berangkat Sekolah', '2026-01-05 01:57:08', '2026-01-05 01:57:08'),
+(24, '240103026', 2, '2026-01-05 02:10:55', 'Hadir', 'Berangkat Sekolah', '2026-01-05 02:10:55', '2026-01-05 02:10:55'),
+(25, '240103048', 2, '2026-01-07 04:00:42', 'Hadir', 'Berangkat Sekolah', '2026-01-07 04:00:42', '2026-01-07 04:00:42');
 
 -- --------------------------------------------------------
 
@@ -101,6 +104,7 @@ CREATE TABLE `jadwal_absen` (
   `nama_kegiatan` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `jam_mulai` time NOT NULL,
   `jam_selesai` time NOT NULL,
+  `hari` json DEFAULT NULL,
   `kode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `keterangan` text COLLATE utf8mb4_unicode_ci,
   `aktif` tinyint(1) NOT NULL DEFAULT '1',
@@ -112,11 +116,11 @@ CREATE TABLE `jadwal_absen` (
 -- Dumping data for table `jadwal_absen`
 --
 
-INSERT INTO `jadwal_absen` (`id`, `nama_kegiatan`, `jam_mulai`, `jam_selesai`, `kode`, `keterangan`, `aktif`, `created_at`, `updated_at`) VALUES
-(1, 'Ngaji Pagi', '05:30:00', '06:11:00', NULL, NULL, 0, '2025-10-13 20:28:06', '2025-12-11 05:20:53'),
-(2, 'Berangkat Sekolah', '06:45:00', '13:20:00', NULL, NULL, 1, '2025-10-13 20:28:06', '2025-12-11 05:51:43'),
-(3, 'Madin', '18:30:00', '20:00:00', NULL, NULL, 1, '2025-10-13 20:28:06', '2025-10-13 20:28:06'),
-(5, 'taqror', '21:00:00', '22:00:00', NULL, NULL, 1, '2025-12-14 12:12:27', '2025-12-14 12:12:27');
+INSERT INTO `jadwal_absen` (`id`, `nama_kegiatan`, `jam_mulai`, `jam_selesai`, `hari`, `kode`, `keterangan`, `aktif`, `created_at`, `updated_at`) VALUES
+(1, 'Ngaji Pagi', '05:30:00', '06:11:00', NULL, NULL, NULL, 0, '2025-10-13 20:28:06', '2025-12-11 05:20:53'),
+(2, 'Berangkat Sekolah', '06:45:00', '13:20:00', '[1, 2, 3, 4, 5, 6]', NULL, NULL, 1, '2025-10-13 20:28:06', '2026-01-05 02:10:49'),
+(3, 'Madin', '18:30:00', '20:00:00', '[1, 2, 3, 5, 6]', NULL, NULL, 1, '2025-10-13 20:28:06', '2026-01-05 02:09:51'),
+(5, 'taqror', '21:00:00', '22:00:00', NULL, NULL, NULL, 1, '2025-12-14 12:12:27', '2025-12-14 12:12:27');
 
 -- --------------------------------------------------------
 
@@ -183,7 +187,9 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (11, '2025_10_15_085942_add_kegiatan_to_absensi_table', 8),
 (12, '2025_12_09_100037_create_jadwal_absen_table', 9),
 (13, '2025_12_09_101800_add_fields_to_jadwal_absen_table', 9),
-(14, '2025_10_09_000000_create_santri_table', 10);
+(14, '2025_10_09_000000_create_santri_table', 10),
+(15, '2025_12_14_202507_create_sessions_table', 11),
+(16, '2026_01_05_090200_add_hari_to_jadwal_absen_table', 11);
 
 -- --------------------------------------------------------
 
@@ -446,9 +452,12 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('0JQ6dkbO5ScKikqhaD5xpPPApRwdi6sxXTcglzAc', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiRElydUpBOVhWSGJ0Tlk0QWpOUFJsSGlobUFKcEpnMTFETzNURXBtNCI7czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTtzOjk6Il9wcmV2aW91cyI7YToxOntzOjM6InVybCI7czoyODoiaHR0cDovLzEyNy4wLjAuMTo4MDAwL2phZHdhbCI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=', 1766078581),
-('9YdkHFDZ23GLcLYN4ZXjFS0UGEfJqsT5LA6O12JU', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiR2Y3SFIyZW9tT2JFTHZiTXFrdkpJT1ZvaGNmdWF4cXM2ZEdtM3hQQSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9kYXNoYm9hcmQiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=', 1765432843),
-('vTeqyiOGEk6aHJFJAafCb0gBWeCtzBoSNNJgjQdv', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiT2lMYUJDcE14dGZWYzNGNFZBb21QZU94b3J4bjR4VkpZbUVLT1E5cSI7czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTtzOjk6Il9wcmV2aW91cyI7YToxOntzOjM6InVybCI7czoyODoiaHR0cDovLzEyNy4wLjAuMTo4MDAwL2phZHdhbCI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=', 1765714347);
+('dvHBWFGsLMzjaMY7SocPGwvnLT0S7qFeK9S2TQhX', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiazdtVENaRk5QUGFxcHNDQkVxd2JYR0JDMk5yU0tFdzVuNXYzNGE0SiI7czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTtzOjk6Il9wcmV2aW91cyI7YToxOntzOjM6InVybCI7czoyNzoiaHR0cDovLzEyNy4wLjAuMTo4MDAwL3Jla2FwIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319fQ==', 1767747562),
+('FWZ8rs02iZbqT2k2kID1FmZuZY1hDJjkHloozcHP', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoibTg3SFdaWjR0N2NaV1Y4bDhmM3lLeWNDbUcyallUQ2UyR0tUQkYyeSI7czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTtzOjk6Il9wcmV2aW91cyI7YToxOntzOjM6InVybCI7czo4MDoiaHR0cDovLzEyNy4wLjAuMTo4MDAwL3Jla2FwLWRhdGE/amFkd2FsX2lkPTIma2VsYXM9MUEmc2VhcmNoPSZ0YW5nZ2FsPTIwMjYtMDEtMDYiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1767670495),
+('hvFmp3Z4RDKq4m5Zsp5iA5aOulAUI21CAigffEtS', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiNTFwb3UycldBOXdYY2tSbldia3hVV1h1bUFmSmtGTnJTbWtGSWw5QiI7czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTtzOjk6Il9wcmV2aW91cyI7YToxOntzOjM6InVybCI7czoyNzoiaHR0cDovLzEyNy4wLjAuMTo4MDAwL3Jla2FwIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319fQ==', 1767758390),
+('izsbf1cl1YnbQKkv2OKSYVPzPIH8zkbPCwe0TVJ9', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiSWJiM0ZKVGVHamR1SG1iOEU0SlBFdnYySGZNOGJwSGpaTGlVSlN1RyI7czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTtzOjk6Il9wcmV2aW91cyI7YToxOntzOjM6InVybCI7czo3OToiaHR0cDovLzEyNy4wLjAuMTo4MDAwL3Jla2FwLWRhdGE/a2VnaWF0YW49MiZrZWxhcz0yQSZzZWFyY2g9JnRhbmdnYWw9MjAyNi0wMS0wNyI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=', 1767758459),
+('RJ07yLu2y0t1KfDkMxxut4rt93XlCoY2mVVLanq2', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoicjZhcGVnb0NDUVdOYmc2ck16MkRyOGZjY2VVWHhRdmFFanVFUzJqYyI7czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTtzOjk6Il9wcmV2aW91cyI7YToxOntzOjM6InVybCI7czozMjoiaHR0cDovLzEyNy4wLjAuMTo4MDAwL3Jla2FwLWRhdGEiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1767673838),
+('WaJ81BqTpz4QcIdt5hANZOuq47evflexZ8nAEKI6', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiMmhRSjc4YnZWdlFBZFI5Und0Q3hBcTI3ZkJYM2VVS0xCNENQVzgxUSI7czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTtzOjk6Il9wcmV2aW91cyI7YToxOntzOjM6InVybCI7czo4MDoiaHR0cDovLzEyNy4wLjAuMTo4MDAwL3Jla2FwLWRhdGE/amFkd2FsX2lkPTEma2VsYXM9MUEmc2VhcmNoPSZ0YW5nZ2FsPTIwMjYtMDEtMDYiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1767663007);
 
 -- --------------------------------------------------------
 
@@ -567,7 +576,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `absensi`
 --
 ALTER TABLE `absensi`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `failed_jobs`
@@ -591,7 +600,7 @@ ALTER TABLE `jobs`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `santri`

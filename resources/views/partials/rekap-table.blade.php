@@ -1,21 +1,12 @@
-@if (isset($message))
-    <div class="text-center py-16">
-        <div class="mx-auto mb-3 w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-700 flex items-center justify-center text-blue-500 dark:text-blue-200">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-            </svg>
-        </div>
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">{{ $message }}</h3>
-    </div>
-@elseif ($rekap->isEmpty())
+@if ($rekap->isEmpty())
     <div class="text-center py-16">
         <div class="mx-auto mb-3 w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
         </div>
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Tidak ada data santri</h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400">Tidak ada santri di kelas ini.</p>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Pilih Kelas dan Kegiatan</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Silakan pilih kelas dan kegiatan untuk menampilkan rekap absensi.</p>
     </div>
 @else
     <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 shadow">
@@ -34,7 +25,7 @@
             <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                 @foreach ($rekap as $i => $a)
                     @php
-                        $status = strtolower($a->status ?? '');
+                        $status = strtolower($a['status'] ?? '');
                         $badge = match (true) {
                             str_contains($status, 'hadir') => 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
                             str_contains($status, 'izin') => 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
@@ -42,18 +33,18 @@
                             default => 'bg-slate-100 text-slate-800 dark:bg-slate-900/40 dark:text-slate-200'
                         };
 
-                        $waktu = $a->waktu ? \Carbon\Carbon::parse($a->waktu)->setTimezone('Asia/Jakarta')->format('H:i:s') : '-';
+                        $waktu = $a['waktu'] ? \Carbon\Carbon::parse($a['waktu'])->setTimezone('Asia/Jakarta')->format('H:i:s') : '-';
                     @endphp
                     <tr class="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-800 dark:even:bg-gray-700 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition">
                         <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{{ $i + 1 }}</td>
-                        <td class="px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-100">{{ $a->nis }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-800 dark:text-gray-100">{{ $a->nama ?? '-' }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{{ $a->kelas ?? '-' }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{{ $a->kegiatan ?? '-' }}</td>
+                        <td class="px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-100">{{ $a['nis'] }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-800 dark:text-gray-100">{{ $a['nama'] }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{{ $a['kelas'] }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{{ $a['kegiatan'] }}</td>
                         <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">{{ $waktu }}</td>
                         <td class="px-4 py-3">
                             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {{ $badge }}">
-                                {{ ucfirst($a->status ?? '-') }}
+                                {{ ucfirst($a['status']) }}
                             </span>
                         </td>
                     </tr>

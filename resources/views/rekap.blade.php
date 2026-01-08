@@ -19,29 +19,23 @@
                 <div class="p-6" x-data="{ loading: false }">
                     <!-- Filter Section -->
                     <div class="mb-6 flex flex-wrap items-center gap-3">
-                        <select id="kelas"
+                        <input type="date" id="tanggal"
+                            value="{{ $tanggal ?? now()->format('Y-m-d') }}"
                             class="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-3 py-2 focus:ring-2 focus:ring-blue-500">
+
+                        <select id="kelas" class="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-3 py-2 focus:ring-2 focus:ring-blue-500">
                             <option value="">-- Pilih Kelas --</option>
                             @foreach ($kelasList as $kelas)
-                                <option value="{{ $kelas }}">{{ $kelas }}</option>
+                                <option value="{{ $kelas }}" {{ ($kelasFilter ?? '') == $kelas ? 'selected' : '' }}>{{ $kelas }}</option>
                             @endforeach
                         </select>
 
-                        <select id="kegiatan"
-                            class="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                        <select id="kegiatan" class="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-3 py-2 focus:ring-2 focus:ring-blue-500">
                             <option value="">-- Pilih Kegiatan --</option>
                             @foreach ($kegiatanList as $kegiatan)
-                                <option value="{{ $kegiatan->id }}">{{ $kegiatan->nama_kegiatan }}</option>
+                                <option value="{{ $kegiatan->id }}" {{ ($kegiatanFilter ?? '') == $kegiatan->id ? 'selected' : '' }}>{{ $kegiatan->nama_kegiatan }}</option>
                             @endforeach
                         </select>
-
-                        <input type="date" id="tanggal"
-                            value="{{ now()->format('Y-m-d') }}"
-                            class="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-3 py-2 focus:ring-2 focus:ring-blue-500">
-
-                        <input type="text" id="search" placeholder="   Cari nama atau NIS..."
-                            class="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-4 py-2 pl-10 w-64 focus:ring-2 focus:ring-blue-500"
-                            style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke-width=\'1.5\' stroke=\'gray\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M21 21l-4.35-4.35M9.5 17A7.5 7.5 0 109.5 2a7.5 7.5 0 000 15z\'/></svg>'); background-repeat: no-repeat; background-position: 10px center; background-size: 18px;">
 
                         <button id="resetBtn" class="px-3 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition">
                             Reset
@@ -67,27 +61,36 @@
     </div>
 
     <script>
+    const tanggal = document.getElementById('tanggal');
     const kelas = document.getElementById('kelas');
     const kegiatan = document.getElementById('kegiatan');
-    const tanggal = document.getElementById('tanggal');
-    const search = document.getElementById('search');
     const rekapContainer = document.getElementById('rekap-container');
     const loading = document.getElementById('loading');
     const resetBtn = document.getElementById('resetBtn');
 
-    let typingTimer;
-    const delay = 500; // waktu tunggu setelah berhenti mengetik (ms)
-
     // Fetch data dari server tanpa reload
     async function fetchRekap() {
+        // Hanya fetch jika kelas dan kegiatan sudah dipilih
+        if (!kelas.value || !kegiatan.value) {
+            rekapContainer.innerHTML = `<div class='text-center py-16'>
+                <div class='mx-auto mb-3 w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500'>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                    </svg>
+                </div>
+                <h3 class='text-lg font-semibold text-gray-800 dark:text-gray-200'>Pilih Kelas dan Kegiatan</h3>
+                <p class='text-sm text-gray-500 dark:text-gray-400'>Silakan pilih kelas dan kegiatan untuk menampilkan rekap absensi.</p>
+            </div>`;
+            return;
+        }
+
         loading.classList.remove('hidden');
         rekapContainer.innerHTML = '';
 
         const query = new URLSearchParams({
-            kelas: kelas.value,
-            kegiatan: kegiatan.value,
             tanggal: tanggal.value,
-            search: search.value
+            kelas: kelas.value,
+            kegiatan: kegiatan.value
         }).toString();
 
         try {
@@ -101,22 +104,15 @@
         }
     }
 
-    // Event listener pencarian realtime
-    search.addEventListener('input', () => {
-        clearTimeout(typingTimer);
-        typingTimer = setTimeout(fetchRekap, delay);
-    });
-
     // Event listener perubahan filter
+    tanggal.addEventListener('change', fetchRekap);
     kelas.addEventListener('change', fetchRekap);
     kegiatan.addEventListener('change', fetchRekap);
-    tanggal.addEventListener('change', fetchRekap);
 
     // Reset filter
     resetBtn.addEventListener('click', () => {
         kelas.value = '';
         kegiatan.value = '';
-        search.value = '';
         tanggal.value = new Date().toISOString().split('T')[0];
         fetchRekap();
     });

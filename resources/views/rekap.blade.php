@@ -116,5 +116,104 @@
         tanggal.value = new Date().toISOString().split('T')[0];
         fetchRekap();
     });
+
+    // Update status absensi
+    async function updateStatus(selectElement) {
+        const nis = selectElement.dataset.nis;
+        const newStatus = selectElement.value;
+        const currentStatus = selectElement.dataset.current;
+        
+        if (!newStatus || newStatus === currentStatus) {
+            selectElement.value = '';
+            return;
+        }
+
+        // Konfirmasi perubahan
+        if (!confirm(`Ubah status santri ini menjadi "${newStatus}"?`)) {
+            selectElement.value = '';
+            return;
+        }
+
+        // Disable select sementara
+        selectElement.disabled = true;
+
+        try {
+            const response = await fetch('/rekap/update-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    nis: nis,
+                    jadwal_id: kegiatan.value,
+                    tanggal: tanggal.value,
+                    status: newStatus
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Update badge status di row yang sama
+                const row = selectElement.closest('tr');
+                const badge = row.querySelector('.status-badge');
+                
+                // Update badge text dan class
+                badge.textContent = newStatus;
+                badge.className = 'status-badge inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ' + getBadgeClass(newStatus);
+                
+                // Update data-current
+                selectElement.dataset.current = newStatus;
+                
+                // Update disabled options
+                selectElement.querySelectorAll('option').forEach(opt => {
+                    opt.disabled = (opt.value === newStatus);
+                });
+
+                // Show success message
+                showToast('Status berhasil diubah menjadi ' + newStatus, 'success');
+            } else {
+                showToast(data.message || 'Gagal mengubah status', 'error');
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('Terjadi kesalahan saat mengubah status', 'error');
+        } finally {
+            selectElement.disabled = false;
+            selectElement.value = '';
+        }
+    }
+
+    // Helper: Get badge class based on status
+    function getBadgeClass(status) {
+        const s = status.toLowerCase();
+        if (s.includes('hadir')) return 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200';
+        if (s.includes('izin')) return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200';
+        if (s.includes('sakit')) return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200';
+        if (s.includes('alpha')) return 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200';
+        return 'bg-slate-100 text-slate-800 dark:bg-slate-900/40 dark:text-slate-200';
+    }
+
+    // Helper: Show toast notification
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+        toast.className = `fixed bottom-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-y-0`;
+        toast.innerHTML = `
+            <div class="flex items-center gap-2">
+                ${type === 'success' ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' : ''}
+                ${type === 'error' ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>' : ''}
+                <span>${message}</span>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('opacity-0', 'translate-y-2');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
     </script>
 </x-app-layout>

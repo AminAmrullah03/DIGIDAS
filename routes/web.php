@@ -27,6 +27,7 @@ Route::middleware(['auth'])->group(function () {
 
     // ✅ Halaman Rekap
     Route::get('/rekap', [AbsensiController::class, 'rekap'])->name('rekap');
+    Route::post('/rekap/update-status', [AbsensiController::class, 'updateStatus'])->name('rekap.updateStatus');
 
     // ✅ Halaman Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

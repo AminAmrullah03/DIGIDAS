@@ -170,4 +170,58 @@ class AbsensiController extends Controller
         return view('partials.rekap-table', compact('rekap'));
     }
 
+    // ✅ Update status absensi (untuk edit dari halaman rekap)
+    public function updateStatus(Request $request)
+    {
+        $request->validate([
+            'nis' => 'required|string',
+            'jadwal_id' => 'required|integer',
+            'tanggal' => 'required|date',
+            'status' => 'required|in:Hadir,Izin,Sakit,Alpha',
+        ]);
+
+        $nis = $request->input('nis');
+        $jadwalId = $request->input('jadwal_id');
+        $tanggal = $request->input('tanggal');
+        $status = $request->input('status');
+
+        // Cek apakah santri ada
+        $santri = Santri::where('nis', $nis)->first();
+        if (!$santri) {
+            return response()->json(['success' => false, 'message' => 'Santri tidak ditemukan'], 404);
+        }
+
+        // Cek apakah jadwal ada
+        $jadwal = JadwalAbsen::find($jadwalId);
+        if (!$jadwal) {
+            return response()->json(['success' => false, 'message' => 'Jadwal tidak ditemukan'], 404);
+        }
+
+        // Cari absensi yang sudah ada
+        $absensi = Absensi::where('nis', $nis)
+            ->where('jadwal_id', $jadwalId)
+            ->whereDate('waktu', $tanggal)
+            ->first();
+
+        if ($absensi) {
+            // Update status yang sudah ada
+            $absensi->update(['status' => $status]);
+        } else {
+            // Buat record baru (untuk santri yang sebelumnya Alpha/tidak ada record)
+            Absensi::create([
+                'nis' => $nis,
+                'jadwal_id' => $jadwalId,
+                'status' => $status,
+                'kegiatan' => $jadwal->nama_kegiatan,
+                'waktu' => $tanggal . ' 00:00:00', // Set waktu default untuk record manual
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status berhasil diubah menjadi ' . $status,
+            'status' => $status,
+        ]);
+    }
+
 }

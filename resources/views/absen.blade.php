@@ -1,22 +1,49 @@
 <x-app-layout>
-    <div class="py-12 transition-colors duration-300 bg-gray-50 min-h-screen relative">
+    <!-- Include html5-qrcode library -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+    <div class="py-12 transition-colors duration-300 bg-gray-50 dark:bg-gray-900 min-h-screen relative">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-center">
                 <div class="w-full max-w-md">
-                    <div id="absen-card" class="bg-white shadow-sm sm:rounded-xl p-6 transition-all duration-500">
+                    <div id="absen-card" class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-xl p-6 transition-all duration-500">
                         <div class="mb-4 text-center">
-                            <h2 class="text-2xl font-bold text-gray-900">📷 Absensi Santri</h2>
-                            <p class="mt-1 text-sm text-gray-600">Scan atau ketik NIS — otomatis kirim setelah berhenti mengetik.</p>
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">📷 Absensi Santri</h2>
+                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Scan atau ketik NIS — otomatis kirim setelah berhenti mengetik.</p>
                         </div>
 
                         <label for="nis_input" class="sr-only">NIS</label>
                         <input id="nis_input" type="text" placeholder="Scan NIS di sini..." autofocus
-                            class="block w-full rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-400 px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300" />
+                            class="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300" />
+
+                        <!-- Camera scan button -->
+                        <button id="btn-scan-camera" type="button"
+                            class="mt-3 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                            </svg>
+                            Scan dengan Kamera
+                        </button>
+
+                        <!-- Camera scanner container (hidden by default) -->
+                        <div id="camera-container" class="hidden mt-4">
+                            <div class="relative">
+                                <div id="qr-reader" class="rounded-lg overflow-hidden"></div>
+                                <button id="btn-stop-camera" type="button"
+                                    class="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium transition-all duration-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    Tutup Kamera
+                                </button>
+                            </div>
+                        </div>
 
                         <div id="result" class="mt-5 text-base transition-all duration-500 ease-in-out"></div>
 
-                        <div class="mt-6 flex items-center justify-between text-xs text-gray-500">
-                            <a href="/rekap" class="text-blue-600 hover:text-blue-700 font-medium">Lihat rekap →</a>
+                        <div class="mt-6 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                            <a href="/rekap" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">Lihat rekap →</a>
                         </div>
                     </div>
                 </div>
@@ -157,5 +184,131 @@
     document.head.appendChild(style);
 
     window.addEventListener('load', () => input.focus());
+
+    // ========== CAMERA QR SCANNER ==========
+    const btnScanCamera = document.getElementById('btn-scan-camera');
+    const btnStopCamera = document.getElementById('btn-stop-camera');
+    const cameraContainer = document.getElementById('camera-container');
+    let html5QrCode = null;
+    let isScanning = false;
+
+    // Start camera scanner
+    btnScanCamera.addEventListener('click', async function() {
+        if (isScanning) return;
+
+        try {
+            // Show camera container
+            cameraContainer.classList.remove('hidden');
+            btnScanCamera.disabled = true;
+            btnScanCamera.innerHTML = `
+                <svg class="w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+                Membuka Kamera...
+            `;
+
+            // Initialize scanner
+            html5QrCode = new Html5Qrcode("qr-reader");
+
+            const qrConfig = {
+                fps: 10,
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1.0
+            };
+
+            // Try to get back camera first (for mobile), fallback to any camera
+            let cameraId = null;
+            try {
+                const devices = await Html5Qrcode.getCameras();
+                if (devices && devices.length > 0) {
+                    // Prefer back camera
+                    const backCamera = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('belakang'));
+                    cameraId = backCamera ? backCamera.id : devices[0].id;
+                }
+            } catch (e) {
+                console.log('Could not get cameras, using facingMode');
+            }
+
+            const startConfig = cameraId 
+                ? cameraId 
+                : { facingMode: "environment" };
+
+            await html5QrCode.start(
+                startConfig,
+                qrConfig,
+                onScanSuccess,
+                onScanFailure
+            );
+
+            isScanning = true;
+            btnScanCamera.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                </svg>
+                Kamera Aktif
+            `;
+            btnScanCamera.classList.remove('from-blue-600', 'to-indigo-600', 'hover:from-blue-700', 'hover:to-indigo-700');
+            btnScanCamera.classList.add('from-green-600', 'to-emerald-600');
+
+        } catch (err) {
+            console.error('Error starting camera:', err);
+            showToast('error', 'Gagal membuka kamera. Pastikan izin kamera diberikan.');
+            stopCamera();
+        }
+    });
+
+    // Stop camera scanner
+    btnStopCamera.addEventListener('click', stopCamera);
+
+    async function stopCamera() {
+        if (html5QrCode && isScanning) {
+            try {
+                await html5QrCode.stop();
+            } catch (e) {
+                console.log('Error stopping camera:', e);
+            }
+        }
+        
+        isScanning = false;
+        html5QrCode = null;
+        cameraContainer.classList.add('hidden');
+        btnScanCamera.disabled = false;
+        btnScanCamera.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+            </svg>
+            Scan dengan Kamera
+        `;
+        btnScanCamera.classList.remove('from-green-600', 'to-emerald-600');
+        btnScanCamera.classList.add('from-blue-600', 'to-indigo-600', 'hover:from-blue-700', 'hover:to-indigo-700');
+        
+        // Clear the qr-reader div
+        const qrReader = document.getElementById('qr-reader');
+        if (qrReader) qrReader.innerHTML = '';
+    }
+
+    // QR Code scan success callback
+    function onScanSuccess(decodedText, decodedResult) {
+        console.log('QR Code detected:', decodedText);
+        
+        // Stop camera after successful scan
+        stopCamera();
+        
+        // Set the NIS value and submit
+        input.value = decodedText;
+        submitNIS(decodedText);
+    }
+
+    // QR Code scan failure callback (called frequently, just log occasionally)
+    let scanFailCount = 0;
+    function onScanFailure(error) {
+        scanFailCount++;
+        if (scanFailCount % 100 === 0) {
+            console.log('Scanning...', error);
+        }
+    }
     </script>
 </x-app-layout>

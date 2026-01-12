@@ -87,9 +87,9 @@ Route::get('/import-santri', function () {
 Route::get('/rekap-data', [AbsensiController::class, 'rekapData'])->name('rekap.data');
 
 // ============================================================
-// ROUTES UNTUK WALI SANTRI (subdomain: rekap.absen.digidas.ac.id)
+// ROUTES UNTUK WALI SANTRI (subdomain: rekap.digidas.ac.id)
 // ============================================================
-Route::domain('rekap.absen.digidas.ac.id')->group(function () {
+Route::domain('rekap.digidas.ac.id')->group(function () {
     
     // Halaman utama redirect ke login atau dashboard
     Route::get('/', function () {

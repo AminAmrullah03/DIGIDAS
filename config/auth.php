@@ -40,6 +40,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'wali' => [
+            'driver' => 'session',
+            'provider' => 'wali_santri',
+        ],
     ],
 
     /*
@@ -65,10 +69,10 @@ return [
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'wali_santri' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\WaliSantri::class,
+        ],
     ],
 
     /*

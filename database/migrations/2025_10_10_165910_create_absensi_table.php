@@ -11,12 +11,14 @@ return new class extends Migration
         Schema::create('absensi', function (Blueprint $table) {
             $table->id();
             $table->string('nis', 50);
+            $table->unsignedBigInteger('jadwal_id')->nullable();
             $table->timestamp('waktu')->useCurrent();
             $table->string('status', 20)->default('Hadir');
+            $table->string('kegiatan', 255)->nullable();
             $table->timestamps();
 
-            // Foreign key opsional (kalau ingin keterkaitan santri)
-            $table->foreign('nis')->references('nis')->on('santri')->onDelete('cascade');
+            $table->index('nis');
+            $table->index('jadwal_id');
         });
     }
 

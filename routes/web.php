@@ -3,6 +3,8 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\Admin\JadwalAbsenController;
+use App\Http\Controllers\Wali\WaliAuthController;
+use App\Http\Controllers\Wali\WaliDashboardController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Santri;
 
@@ -83,5 +85,32 @@ Route::get('/import-santri', function () {
 });
 
 Route::get('/rekap-data', [AbsensiController::class, 'rekapData'])->name('rekap.data');
+
+// ============================================================
+// ROUTES UNTUK WALI SANTRI (subdomain: rekap.absen.digidas.ac.id)
+// ============================================================
+Route::domain('rekap.absen.digidas.ac.id')->group(function () {
+    
+    // Halaman utama redirect ke login atau dashboard
+    Route::get('/', function () {
+        if (auth()->guard('wali')->check()) {
+            return redirect('/dashboard');
+        }
+        return redirect('/login');
+    });
+
+    // Auth routes (guest only)
+    Route::middleware('wali.guest')->group(function () {
+        Route::get('/login', [WaliAuthController::class, 'showLogin'])->name('wali.login');
+        Route::post('/login', [WaliAuthController::class, 'login'])->name('wali.login.post');
+    });
+
+    // Protected routes (wali authenticated)
+    Route::middleware('wali.auth')->group(function () {
+        Route::get('/dashboard', [WaliDashboardController::class, 'index'])->name('wali.dashboard');
+        Route::get('/rekap', [WaliDashboardController::class, 'rekap'])->name('wali.rekap');
+        Route::post('/logout', [WaliAuthController::class, 'logout'])->name('wali.logout');
+    });
+});
 
 require __DIR__.'/auth.php';

@@ -8,15 +8,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('santri')) {
-            Schema::create('santri', function (Blueprint $table) {
-                // Primary key menggunakan NIS (string)
-                $table->string('nis', 50)->primary();
-                $table->string('nama');
-                $table->string('kelas')->nullable();
-                $table->timestamps();
-            });
-        }
+        Schema::create('santri', function (Blueprint $table) {
+            $table->id();
+            $table->string('nis', 50)->unique()->nullable();
+            $table->string('nama', 100)->nullable();
+            $table->string('kelas', 50)->nullable();
+            $table->timestamps();
+        });
     }
 
     public function down(): void

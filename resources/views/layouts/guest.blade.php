@@ -36,11 +36,11 @@
                     <div class="mb-8">
                         <img src="{{ asset('images/ppd.png') }}" alt="Logo" class="w-32 h-32 object-contain drop-shadow-2xl">
                     </div>
-                    <h1 class="text-4xl font-bold text-center mb-4">Sistem Absensi QR</h1>
-                    <p class="text-xl text-blue-100 text-center mb-8">Pondok Pesantren</p>
+                    <h1 class="text-4xl font-bold text-center mb-4">DIGIDAS <br> Digital Sistem Darus Sholah</h1>
+                    <p class="text-xl text-blue-100 text-center mb-8">Pondok Pesantren Darus Sholah</p>
                     
                     <!-- Features -->
-                    <div class="space-y-4 mt-8">
+                    <!-- <div class="space-y-4 mt-8">
                         <div class="flex items-center gap-3 text-blue-100">
                             <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -65,7 +65,7 @@
                             </div>
                             <span>Jadwal Kegiatan Fleksibel</span>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
 

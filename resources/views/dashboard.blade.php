@@ -10,7 +10,7 @@
                             Selamat Datang 👋
                         </h1>
                         <p class="text-blue-100 text-sm sm:text-base">
-                            Sistem Absensi QR Code - Pondok Pesantren Darus Sholah 
+                            Sistem Digital - Pondok Pesantren Darus Sholah 
                         </p>
                     </div>
                     <div class="flex items-center gap-3 text-white bg-white/20 backdrop-blur-sm rounded-xl px-4 py-3">

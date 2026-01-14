@@ -15,6 +15,15 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('absen')" :active="request()->routeIs('absen')">
+                        {{ __('Absensi') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('spp.rekap')" :active="request()->routeIs('spp.*')">
+                        {{ __('SPP') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('rekap')" :active="request()->routeIs('rekap')">
+                        {{ __('Rekap') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -69,6 +78,15 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('absen')" :active="request()->routeIs('absen')">
+                {{ __('Absensi') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('spp.rekap')" :active="request()->routeIs('spp.*')">
+                {{ __('SPP') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('rekap')" :active="request()->routeIs('rekap')">
+                {{ __('Rekap') }}
             </x-responsive-nav-link>
         </div>
 

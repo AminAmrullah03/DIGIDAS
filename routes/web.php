@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AbsensiController;
+use App\Http\Controllers\SppController;
 use App\Http\Controllers\Admin\JadwalAbsenController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Santri;
@@ -43,6 +44,15 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/{jadwalAbsen}', [JadwalAbsenController::class, 'update'])->name('update');
         Route::delete('/{jadwalAbsen}', [JadwalAbsenController::class, 'destroy'])->name('destroy');
         Route::post('/{jadwalAbsen}/toggle', [JadwalAbsenController::class, 'toggleAktif'])->name('toggle');
+    });
+
+    // ✅ SPP (Pembayaran)
+    Route::prefix('spp')->as('spp.')->group(function () {
+        Route::get('/', [SppController::class, 'index'])->name('index');
+        Route::get('/rekap', [SppController::class, 'rekap'])->name('rekap');
+        Route::get('/santri', [SppController::class, 'getSantriSpp'])->name('santri');
+        Route::post('/bayar', [SppController::class, 'store'])->name('store');
+        Route::get('/riwayat', [SppController::class, 'riwayat'])->name('riwayat');
     });
 });
 

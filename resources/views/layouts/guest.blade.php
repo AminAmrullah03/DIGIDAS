@@ -18,7 +18,7 @@
     <body class="font-sans text-gray-900 dark:text-gray-100 antialiased">
         <div class="min-h-screen flex">
             <!-- Left Side - Branding (Hidden on mobile) -->
-            <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 relative overflow-hidden">
+            <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 relative overflow-hidden">
                 <!-- Background Pattern -->
                 <div class="absolute inset-0 opacity-10">
                     <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -33,8 +33,8 @@
                 
                 <!-- Content -->
                 <div class="relative z-10 flex flex-col justify-center items-center w-full p-12 text-white">
-                    <div class="mb-8">
-                        <img src="{{ asset('images/ppd.png') }}" alt="Logo" class="w-32 h-32 object-contain drop-shadow-2xl">
+                    <div>
+                        <img src="{{ asset('images/ppd.png') }}" alt="Logo" class="object-contain drop-shadow-2xl" style="width: 450px; height: 450px;">
                     </div>
                     <h1 class="text-4xl font-bold text-center mb-4">DIGIDAS <br> Digital Sistem Darus Sholah</h1>
                     <p class="text-xl text-blue-100 text-center mb-8">Pondok Pesantren Darus Sholah</p>

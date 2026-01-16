@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\SppController;
+use App\Http\Controllers\IzinController;
 use App\Http\Controllers\Admin\JadwalAbsenController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Santri;
@@ -53,6 +54,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/santri', [SppController::class, 'getSantriSpp'])->name('santri');
         Route::post('/bayar', [SppController::class, 'store'])->name('store');
         Route::get('/riwayat', [SppController::class, 'riwayat'])->name('riwayat');
+    });
+
+    // ✅ Izin (Perizinan)
+    Route::prefix('izin')->as('izin.')->group(function () {
+        Route::get('/', [IzinController::class, 'index'])->name('index');
+        Route::get('/santri', [IzinController::class, 'getSantri'])->name('santri');
+        Route::post('/store', [IzinController::class, 'store'])->name('store');
+        Route::post('/kembali', [IzinController::class, 'kembali'])->name('kembali');
+        Route::get('/rekap', [IzinController::class, 'rekap'])->name('rekap');
+        Route::post('/update-status', [IzinController::class, 'updateStatus'])->name('updateStatus');
     });
 });
 

@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+<nav x-data="{ open: false }" class="bg-gray dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -18,11 +18,14 @@
                     <x-nav-link :href="route('absen')" :active="request()->routeIs('absen')">
                         {{ __('Absensi') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('rekap')" :active="request()->routeIs('rekap')">
+                        {{ __('Rekap') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('spp.rekap')" :active="request()->routeIs('spp.*')">
                         {{ __('SPP') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('rekap')" :active="request()->routeIs('rekap')">
-                        {{ __('Rekap') }}
+                    <x-nav-link :href="route('izin.index')" :active="request()->routeIs('izin.*')">
+                        {{ __('Izin') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -87,6 +90,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('rekap')" :active="request()->routeIs('rekap')">
                 {{ __('Rekap') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('izin.index')" :active="request()->routeIs('izin.*')">
+                {{ __('Izin') }}
             </x-responsive-nav-link>
         </div>
 

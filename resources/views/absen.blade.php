@@ -61,7 +61,7 @@
     const toastContainer = document.getElementById('toast-container');
 
     let typingTimer;
-    const delay = 400; // jeda 0.4 detik setelah berhenti mengetik
+    const delay = 3000; // jeda 3 detik setelah berhenti mengetik
 
     input.addEventListener('input', function() {
         clearTimeout(typingTimer);

@@ -74,8 +74,8 @@
                 <!-- Mobile Logo -->
                 <div class="lg:hidden mb-8 text-center">
                     <img src="{{ asset('images/ppd.png') }}" alt="Logo" class="w-20 h-20 mx-auto mb-4">
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Sistem Absensi QR</h1>
-                    <p class="text-gray-500 dark:text-gray-400">Pondok Pesantren</p>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Digital System</h1>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Darus Sholah</h1>
                 </div>
 
                 <div class="w-full max-w-md">
@@ -86,7 +86,7 @@
 
                     <!-- Footer -->
                     <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
-                        &copy; {{ date('Y') }} Sistem Absensi QR. All rights reserved.
+                        &copy; {{ date('Y') }} Digital System Darus Sholah
                     </p>
                 </div>
             </div>

@@ -1,1 +1,1 @@
-<img src="{{ asset('images/ppd.png') }}" alt="Absen QR Logo" {{ $attributes->merge(['class' => '']) }}>
+<img src="{{ asset('images/logo1.png') }}" alt="Absen QR Logo" {{ $attributes->merge(['class' => '']) }}>

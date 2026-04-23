@@ -3,23 +3,23 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             <!-- Welcome Section -->
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 dark:from-blue-700 dark:to-indigo-800 rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 dark:from-emerald-700 dark:to-teal-800 rounded-2xl shadow-xl p-6 sm:p-8 mb-6 sm:mb-8">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">
                             أهلاً وسهلاً 👋
                         </h1>
-                        <p class="text-blue-100 text-sm sm:text-base">
+                        <p class="text-teal-50 text-sm sm:text-base">
                             Sistem Digital - Pondok Pesantren Darus Sholah 
                         </p>
                     </div>
-                    <div class="flex items-center gap-3 text-white bg-white/20 backdrop-blur-sm rounded-xl px-4 py-3">
+                    <div class="flex items-center gap-3 text-white bg-white/25 backdrop-blur-md rounded-xl px-4 py-3 border border-white/30 shadow-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                         </svg>
                         <div>
-                            <p class="text-xs text-blue-100">Hari ini</p>
-                            <p class="font-semibold text-sm">{{ now()->locale('id')->isoFormat('dddd, D MMMM Y') }}</p>
+                            <p class="text-xs text-white/90">Hari ini</p>
+                            <p class="font-semibold text-white">{{ now()->locale('id')->isoFormat('dddd, D MMMM Y') }}</p>
                         </div>
                     </div>
                 </div>

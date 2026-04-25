@@ -19,6 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
                      Request::HEADER_X_FORWARDED_PORT |
                      Request::HEADER_X_FORWARDED_PROTO
         );
+
+        // Daftarkan alias middleware 'role' agar bisa dipakai di routes
+        $middleware->alias([
+            'role' => \App\Http\Middleware\CheckRole::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -99,6 +99,7 @@
                     </div>
                 </a>
 
+                @if(Auth::user()->isSuperAdmin())
                 <!-- Card: Jadwal -->
                 <a href="/jadwal" class="group bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-xl border border-emerald-200 dark:border-emerald-700 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400 dark:hover:border-emerald-500">
                     <div class="flex items-start gap-4">
@@ -122,10 +123,12 @@
                         </div>
                     </div>
                 </a>
+                @endif
 
             </div>
 
             <!-- SPP Section -->
+            @if(Auth::user()->isSuperAdmin())
             <div class="mb-4 sm:mb-6">
                 <h2 class="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
                     <div class="w-8 h-8 bg-green-100 dark:bg-green-900/50 rounded-lg flex items-center justify-center">
@@ -211,6 +214,7 @@
                 </a>
 
             </div>
+            @endif
 
             <!-- Perizinan Section -->
             <div class="mb-4 sm:mb-6">

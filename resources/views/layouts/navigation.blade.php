@@ -15,18 +15,27 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+
+                    {{-- Semua role: Absensi, Rekap, Izin --}}
                     <x-nav-link :href="route('absen')" :active="request()->routeIs('absen')">
                         {{ __('Absensi') }}
                     </x-nav-link>
                     <x-nav-link :href="route('rekap')" :active="request()->routeIs('rekap')">
                         {{ __('Rekap') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('spp.rekap')" :active="request()->routeIs('spp.*')">
-                        {{ __('SPP') }}
-                    </x-nav-link>
                     <x-nav-link :href="route('izin.index')" :active="request()->routeIs('izin.*')">
                         {{ __('Izin') }}
                     </x-nav-link>
+
+                    {{-- Hanya Superadmin: SPP & Jadwal --}}
+                    @if(Auth::user()->isSuperAdmin())
+                        <x-nav-link :href="route('jadwal.index')" :active="request()->routeIs('jadwal.*')">
+                            {{ __('Jadwal') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('spp.rekap')" :active="request()->routeIs('spp.*')">
+                            {{ __('SPP') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -82,11 +91,10 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            {{-- Semua role: Absensi, Rekap, Izin --}}
             <x-responsive-nav-link :href="route('absen')" :active="request()->routeIs('absen')">
                 {{ __('Absensi') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('spp.rekap')" :active="request()->routeIs('spp.*')">
-                {{ __('SPP') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('rekap')" :active="request()->routeIs('rekap')">
                 {{ __('Rekap') }}
@@ -94,6 +102,16 @@
             <x-responsive-nav-link :href="route('izin.index')" :active="request()->routeIs('izin.*')">
                 {{ __('Izin') }}
             </x-responsive-nav-link>
+
+            {{-- Hanya Superadmin: SPP & Jadwal --}}
+            @if(Auth::user()->isSuperAdmin())
+                <x-responsive-nav-link :href="route('jadwal.index')" :active="request()->routeIs('jadwal.*')">
+                    {{ __('Jadwal') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('spp.rekap')" :active="request()->routeIs('spp.*')">
+                    {{ __('SPP') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->

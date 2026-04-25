@@ -15,28 +15,49 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Dashboard
+// Dashboard — semua role yang sudah login bisa akses
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-// Group route dengan auth middleware
-Route::middleware(['auth'])->group(function () {
+// ─────────────────────────────────────────────────────────────────────────────
+// ROUTES UNTUK SUPERADMIN & GURU (shared)
+// Kedua role bisa akses: absen, rekap absensi, izin, profile
+// ─────────────────────────────────────────────────────────────────────────────
+Route::middleware(['auth', 'role:superadmin,guru'])->group(function () {
 
-    // ✅ Halaman Absensi
+    // Halaman Absensi
     Route::get('/absen', [AbsensiController::class, 'index'])->name('absen');
     Route::post('/absen', [AbsensiController::class, 'store'])->name('absen.store');
 
-    // ✅ Halaman Rekap
+    // Halaman Rekap Absensi
     Route::get('/rekap', [AbsensiController::class, 'rekap'])->name('rekap');
     Route::post('/rekap/update-status', [AbsensiController::class, 'updateStatus'])->name('rekap.updateStatus');
+    Route::get('/rekap-data', [AbsensiController::class, 'rekapData'])->name('rekap.data');
 
-    // ✅ Halaman Profile
+    // Perizinan
+    Route::prefix('izin')->as('izin.')->group(function () {
+        Route::get('/', [IzinController::class, 'index'])->name('index');
+        Route::get('/santri', [IzinController::class, 'getSantri'])->name('santri');
+        Route::post('/store', [IzinController::class, 'store'])->name('store');
+        Route::post('/kembali', [IzinController::class, 'kembali'])->name('kembali');
+        Route::get('/rekap', [IzinController::class, 'rekap'])->name('rekap');
+        Route::post('/update-status', [IzinController::class, 'updateStatus'])->name('updateStatus');
+    });
+
+    // Profile (semua role bisa edit profil sendiri)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
-    // ✅ Jadwal Absen
+// ─────────────────────────────────────────────────────────────────────────────
+// ROUTES KHUSUS SUPERADMIN
+// Hanya superadmin yang bisa akses: jadwal, SPP, import santri
+// ─────────────────────────────────────────────────────────────────────────────
+Route::middleware(['auth', 'role:superadmin'])->group(function () {
+
+    // Jadwal Absen
     Route::prefix('jadwal')->as('jadwal.')->group(function () {
         Route::get('/', [JadwalAbsenController::class, 'index'])->name('index');
         Route::get('/create', [JadwalAbsenController::class, 'create'])->name('create');
@@ -47,7 +68,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{jadwalAbsen}/toggle', [JadwalAbsenController::class, 'toggleAktif'])->name('toggle');
     });
 
-    // ✅ SPP (Pembayaran)
+    // SPP (Pembayaran)
     Route::prefix('spp')->as('spp.')->group(function () {
         Route::get('/', [SppController::class, 'index'])->name('index');
         Route::get('/rekap', [SppController::class, 'rekap'])->name('rekap');
@@ -56,53 +77,41 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/riwayat', [SppController::class, 'riwayat'])->name('riwayat');
     });
 
-    // ✅ Izin (Perizinan)
-    Route::prefix('izin')->as('izin.')->group(function () {
-        Route::get('/', [IzinController::class, 'index'])->name('index');
-        Route::get('/santri', [IzinController::class, 'getSantri'])->name('santri');
-        Route::post('/store', [IzinController::class, 'store'])->name('store');
-        Route::post('/kembali', [IzinController::class, 'kembali'])->name('kembali');
-        Route::get('/rekap', [IzinController::class, 'rekap'])->name('rekap');
-        Route::post('/update-status', [IzinController::class, 'updateStatus'])->name('updateStatus');
-    });
-});
+    // Import CSV Santri
+    Route::get('/import-santri', function () {
+        $path = storage_path('app/public/santri.csv');
 
-// ✅ Import CSV santri (sementara, nanti bisa dipindah ke controller)
-Route::get('/import-santri', function () {
-    $path = storage_path('app/public/santri.csv');
-
-    if (!file_exists($path)) {
-        return "❌ File CSV tidak ditemukan di: $path";
-    }
-
-    $file = fopen($path, 'r');
-    $isFirstRow = true;
-    $count = 0;
-
-    while (($data = fgetcsv($file, 1000, ',')) !== FALSE) {
-        if ($isFirstRow) {
-            $isFirstRow = false;
-            continue; // skip header
+        if (!file_exists($path)) {
+            return "❌ File CSV tidak ditemukan di: $path";
         }
 
-        $nis = trim($data[0]);
-        $nama = trim($data[1]);
-        $kelas = trim($data[2] ?? '');
+        $file = fopen($path, 'r');
+        $isFirstRow = true;
+        $count = 0;
 
-        if (!$nis || !$nama) continue;
+        while (($data = fgetcsv($file, 1000, ',')) !== FALSE) {
+            if ($isFirstRow) {
+                $isFirstRow = false;
+                continue;
+            }
 
-        Santri::updateOrCreate(
-            ['nis' => $nis],
-            ['nama' => $nama, 'kelas' => $kelas]
-        );
+            $nis  = trim($data[0]);
+            $nama = trim($data[1]);
+            $kelas = trim($data[2] ?? '');
 
-        $count++;
-    }
+            if (!$nis || !$nama) continue;
 
-    fclose($file);
-    return "✅ Import selesai! Jumlah data masuk: {$count}";
+            Santri::updateOrCreate(
+                ['nis' => $nis],
+                ['nama' => $nama, 'kelas' => $kelas]
+            );
+
+            $count++;
+        }
+
+        fclose($file);
+        return "✅ Import selesai! Jumlah data masuk: {$count}";
+    });
 });
-
-Route::get('/rekap-data', [AbsensiController::class, 'rekapData'])->name('rekap.data');
 
 require __DIR__.'/auth.php';

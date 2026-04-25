@@ -184,12 +184,9 @@
             {{-- ── Logo ── --}}
             <div class="flex items-center gap-8">
                 <a href="{{ route('dashboard') }}" class="flex items-center gap-3 group">
-                    <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px rgba(16,185,129,0.4);transition:box-shadow 0.2s;" class="group-hover:shadow-[0_0_24px_rgba(16,185,129,0.6)]">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-                            <rect x="14" y="14" width="7" height="7"/><path d="M3 17l2 2 4-4"/>
-                        </svg>
-                    </div>
+                    <img src="{{ asset('images/logo1.png') }}" alt="DIGIDAS Logo"
+                         style="height:34px;width:auto;object-fit:contain;filter:drop-shadow(0 0 8px rgba(16,185,129,0.4));transition:filter 0.2s;"
+                         class="group-hover:drop-shadow-[0_0_12px_rgba(16,185,129,0.7)]">
                     <span style="font-size:0.9rem;font-weight:700;color:#f1f5f9;letter-spacing:-0.01em;">DIGI<span style="color:#10b981">DAS</span></span>
                 </a>
 
@@ -232,7 +229,7 @@
                         </a>
                         <a href="{{ route('admin.users.index') }}" class="nav-pill {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-                            Pengguna
+                            User
                         </a>
                     @endif
                 </div>
@@ -316,7 +313,7 @@
                 </a>
                 <a href="{{ route('admin.users.index') }}" class="mobile-pill {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-                    Pengguna
+                    User
                 </a>
             @endif
         </div>

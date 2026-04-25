@@ -10,9 +10,8 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // ── Superadmin ────────────────────────────────────────────────────────
         User::updateOrCreate(
-            ['email' => 'superadmin@digidas.test'],
+            ['nip' => 'SA0001'],
             [
                 'name'     => 'Super Admin',
                 'password' => Hash::make('superadmin123'),
@@ -20,9 +19,8 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // ── Guru ──────────────────────────────────────────────────────────────
         User::updateOrCreate(
-            ['email' => 'guru@digidas.test'],
+            ['nip' => 'GR0001'],
             [
                 'name'     => 'Guru Demo',
                 'password' => Hash::make('guru123'),

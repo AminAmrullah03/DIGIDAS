@@ -35,6 +35,9 @@
                         <x-nav-link :href="route('spp.rekap')" :active="request()->routeIs('spp.*')">
                             {{ __('SPP') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                            {{ __('User') }}
+                        </x-nav-link>
                     @endif
                 </div>
             </div>
@@ -110,6 +113,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('spp.rekap')" :active="request()->routeIs('spp.*')">
                     {{ __('SPP') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                    {{ __('User') }}
                 </x-responsive-nav-link>
             @endif
         </div>

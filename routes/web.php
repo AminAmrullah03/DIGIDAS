@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\SppController;
 use App\Http\Controllers\IzinController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\JadwalAbsenController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Santri;
@@ -18,7 +19,7 @@ Route::get('/', function () {
 // Dashboard — semua role yang sudah login bisa akses
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth'])->name('dashboard');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ROUTES UNTUK SUPERADMIN & GURU (shared)
@@ -56,6 +57,17 @@ Route::middleware(['auth', 'role:superadmin,guru'])->group(function () {
 // Hanya superadmin yang bisa akses: jadwal, SPP, import santri
 // ─────────────────────────────────────────────────────────────────────────────
 Route::middleware(['auth', 'role:superadmin'])->group(function () {
+
+    // Manajemen User
+    Route::prefix('admin/users')->as('admin.users.')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/create', [UserController::class, 'create'])->name('create');
+        Route::post('/', [UserController::class, 'store'])->name('store');
+        Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
+        Route::put('/{user}', [UserController::class, 'update'])->name('update');
+        Route::patch('/{user}/reset-password', [UserController::class, 'resetPassword'])->name('resetPassword');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+    });
 
     // Jadwal Absen
     Route::prefix('jadwal')->as('jadwal.')->group(function () {

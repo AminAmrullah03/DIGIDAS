@@ -33,7 +33,6 @@
                         <input type="text" name="nip" value="{{ old('nip') }}" required maxlength="20"
                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
                                placeholder="Contoh: 20240001">
-                        <p class="mt-1 text-xs text-gray-400">NIP digunakan untuk login, harus unik.</p>
                         @error('nip') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                     </div>
 

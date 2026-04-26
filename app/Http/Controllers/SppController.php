@@ -222,20 +222,32 @@ class SppController extends Controller
 
     public function riwayat(Request $request)
     {
-        $nis = $request->input('nis');
-        $tahun = $request->input('tahun', 1446);
+        $nis    = $request->input('nis');
+        $tahun  = $request->input('tahun', 1446);
+        $period = $request->input('period', 'all'); // today, week, custom, all
+        $dari   = $request->input('dari');
+        $sampai = $request->input('sampai');
 
         $query = SppPembayaran::with('santri')
             ->where('tahun', $tahun)
             ->orderBy('created_at', 'desc');
 
-        if ($nis) {
-            $query->where('nis', $nis);
+        if ($nis) $query->where('nis', $nis);
+
+        // Filter periode
+        if ($period === 'today') {
+            $query->whereDate('created_at', today());
+        } elseif ($period === 'week') {
+            $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+        } elseif ($period === 'custom' && $dari && $sampai) {
+            $query->whereBetween('created_at', [$dari . ' 00:00:00', $sampai . ' 23:59:59']);
         }
 
-        $pembayaran = $query->paginate(20);
+        $pembayaran  = $query->paginate(20)->withQueryString();
+        $totalNominal = $query->sum('nominal_bayar');
+        $totalCount   = $query->count();
 
-        return view('spp.riwayat', compact('pembayaran', 'tahun', 'nis'));
+        return view('spp.riwayat', compact('pembayaran', 'tahun', 'nis', 'period', 'dari', 'sampai', 'totalNominal', 'totalCount'));
     }
 
     private function generateTagihanTahunan($nis, $tahun)

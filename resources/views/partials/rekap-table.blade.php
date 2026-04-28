@@ -1,14 +1,4 @@
-@if ($rekap->isEmpty())
-    <div class="text-center py-16">
-        <div class="mx-auto mb-3 w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-            </svg>
-        </div>
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Pilih Kelas dan Kegiatan</h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400">Silakan pilih kelas dan kegiatan untuk menampilkan rekap absensi.</p>
-    </div>
-@else
+@if (!$rekap->isEmpty())
     <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 shadow">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-700">

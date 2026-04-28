@@ -38,21 +38,21 @@ $totalBelum  = $totalSantri - $totalLunas;
 .btn-filter{padding:8px 18px;border-radius:10px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-weight:600;font-size:0.83rem;border:none;cursor:pointer;box-shadow:0 2px 8px rgba(16,185,129,0.25);transition:all 0.2s;}
 .btn-filter:hover{transform:translateY(-1px);}
 
-.table-wrap{background:#fff;border-radius:16px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
-.dark .table-wrap{background:#1e293b;border-color:#334155;}
-table{width:100%;border-collapse:collapse;font-size:0.8rem;}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;background:#fff;border-radius:16px;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.dark .table-scroll{background:#1e293b;border-color:#334155;}
 
-/* Sticky columns */
+table{width:100%;border-collapse:collapse;font-size:0.8rem;min-width:900px;}
+
 th,td{white-space:nowrap;}
 th{padding:10px 12px;text-align:center;font-size:0.68rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;background:#f8fafc;border-bottom:1px solid #e2e8f0;}
 .dark th{background:#0f172a;color:#94a3b8;border-color:#334155;}
-th.sticky-col,td.sticky-col{position:sticky;z-index:10;text-align:left;}
-th.sticky-col{background:#f8fafc;z-index:20;}
-.dark th.sticky-col{background:#0f172a;}
-.dark td.sticky-col{background:#1e293b;}
-td.sticky-col{background:#fff;}
-tbody tr:hover td.sticky-col{background:#f8fafc;}
-.dark tbody tr:hover td.sticky-col{background:rgba(255,255,255,0.03);}
+th:first-child,td:first-child{position:sticky;left:0;z-index:10;text-align:left;}
+th:first-child{background:#f8fafc;z-index:20;}
+.dark th:first-child{background:#0f172a;}
+.dark td:first-child{background:#1e293b;}
+td:first-child{background:#fff;}
+tbody tr:hover td:first-child{background:#f8fafc;}
+.dark tbody tr:hover td:first-child{background:rgba(255,255,255,0.03);}
 
 td{padding:9px 12px;border-bottom:1px solid #f1f5f9;text-align:center;color:#374151;}
 .dark td{border-color:#334155;color:#cbd5e1;}
@@ -62,7 +62,6 @@ tbody tr:last-child td{border-bottom:none;}
 
 td.left{text-align:left;}
 
-/* Status cells */
 .cell-lunas{width:32px;height:32px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;}
 .c-lunas{background:#dcfce7;color:#166534;}
 .c-sebagian{background:#fef3c7;color:#92400e;}
@@ -77,8 +76,8 @@ td.left{text-align:left;}
 .dark .total-lunas{color:#34d399;}
 .dark .total-sisa{color:#f87171;}
 
-.legend{display:flex;gap:16px;flex-wrap:wrap;padding:14px 20px;border-top:1px solid #f1f5f9;font-size:0.75rem;}
-.dark .legend{border-color:#334155;}
+.legend{display:flex;gap:16px;flex-wrap:wrap;padding:14px 20px;border-top:1px solid #f1f5f9;font-size:0.75rem;background:#fff;border-radius:0 0 16px 16px;margin-top:-1px;border:1px solid #e2e8f0;border-top:none;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.dark .legend{background:#1e293b;border-color:#334155;}
 .legend-item{display:flex;align-items:center;gap:6px;color:#64748b;}
 .dark .legend-item{color:#94a3b8;}
 .legend-dot{width:22px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;}
@@ -141,77 +140,75 @@ td.left{text-align:left;}
         </div>
 
         {{-- Table --}}
-        <div class="table-wrap">
-            <div style="overflow-x:auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="sticky-col" style="left:0;width:36px;">#</th>
-                            <th class="sticky-col" style="left:36px;min-width:100px;">NIS</th>
-                            <th class="sticky-col" style="left:136px;min-width:180px;">Nama</th>
-                            <th style="min-width:80px;">Kelas</th>
-                            @for($b=1;$b<=12;$b++)
-                                <th title="{{ $bulanFull[$b] }}" style="min-width:52px;">{{ $bulanShort[$b] }}</th>
-                            @endfor
-                            <th style="min-width:100px;background:#ecfdf5;color:#059669;" class="dark:bg-emerald-900/20 dark:text-emerald-400">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($rekapData as $index => $data)
-                        @php
-                            $totalBayar   = 0;
-                            $totalTagihan = 0;
-                        @endphp
-                        <tr>
-                            <td class="sticky-col left" style="left:0;color:#94a3b8;font-size:0.72rem;">{{ $index+1 }}</td>
-                            <td class="sticky-col left" style="left:36px;font-family:monospace;font-weight:600;color:#475569;border-right:1px solid #f1f5f9;" class="dark:border-slate-700 dark:text-slate-300">{{ $data['santri']->nis }}</td>
-                            <td class="sticky-col left" style="left:136px;font-weight:600;color:#1e293b;border-right:1px solid #f1f5f9;" class="dark:border-slate-700 dark:text-white">{{ $data['santri']->nama }}</td>
-                            <td style="font-size:0.78rem;color:#64748b;">{{ $data['santri']->kelas }}</td>
-                            @for($b=1;$b<=12;$b++)
-                                @php
-                                    $t      = $data['tagihan'][$b] ?? null;
-                                    $status = $t ? $t->status : 'belum';
-                                    $nom    = $t ? $t->nominal : 50000;
-                                    $totalTagihan += $nom;
-                                    if($status==='lunas') $totalBayar += $nom;
-                                    elseif($status==='sebagian'){
-                                        $bayar = \App\Models\SppPembayaran::where('nis',$data['santri']->nis)->where('bulan',$b)->where('tahun',$tahun)->sum('nominal_bayar');
-                                        $totalBayar += $bayar;
-                                    }
-                                @endphp
-                                <td>
-                                    <span class="cell-lunas {{ $status==='lunas' ? 'c-lunas' : ($status==='sebagian' ? 'c-sebagian' : 'c-belum') }}" title="{{ $bulanFull[$b] }}: {{ $status }}">
-                                        {{ $status==='lunas' ? '✓' : ($status==='sebagian' ? '◑' : '✗') }}
-                                    </span>
-                                </td>
-                            @endfor
-                            <td class="total-cell" style="background:#f0fdf4;" class="dark:bg-emerald-900/10">
-                                @if($totalBayar>=$totalTagihan)
-                                    <span class="total-lunas">Lunas ✓</span>
-                                @else
-                                    <span class="total-sisa">-Rp{{ number_format($totalTagihan-$totalBayar,0,',','.') }}</span>
-                                @endif
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:36px;">#</th>
+                        <th style="min-width:100px;">NIS</th>
+                        <th style="min-width:180px;">Nama</th>
+                        <th style="min-width:80px;">Kelas</th>
+                        @for($b=1;$b<=12;$b++)
+                            <th title="{{ $bulanFull[$b] }}" style="min-width:52px;">{{ $bulanShort[$b] }}</th>
+                        @endfor
+                        <th style="min-width:100px;background:#ecfdf5;color:#059669;" class="dark:bg-emerald-900/20 dark:text-emerald-400">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($rekapData as $index => $data)
+                    @php
+                        $totalBayar   = 0;
+                        $totalTagihan = 0;
+                    @endphp
+                    <tr>
+                        <td class="left" style="color:#94a3b8;font-size:0.72rem;">{{ $index+1 }}</td>
+                        <td class="left" style="font-family:monospace;font-weight:600;color:#475569;border-right:1px solid #f1f5f9;" class="dark:border-slate-700 dark:text-slate-300">{{ $data['santri']->nis }}</td>
+                        <td class="left" style="font-weight:600;color:#1e293b;border-right:1px solid #f1f5f9;" class="dark:border-slate-700 dark:text-white">{{ $data['santri']->nama }}</td>
+                        <td style="font-size:0.78rem;color:#64748b;">{{ $data['santri']->kelas }}</td>
+                        @for($b=1;$b<=12;$b++)
+                            @php
+                                $t      = $data['tagihan'][$b] ?? null;
+                                $status = $t ? $t->status : 'belum';
+                                $nom    = $t ? $t->nominal : 50000;
+                                $totalTagihan += $nom;
+                                if($status==='lunas') $totalBayar += $nom;
+                                elseif($status==='sebagian'){
+                                    $bayar = \App\Models\SppPembayaran::where('nis',$data['santri']->nis)->where('bulan',$b)->where('tahun',$tahun)->sum('nominal_bayar');
+                                    $totalBayar += $bayar;
+                                }
+                            @endphp
+                            <td>
+                                <span class="cell-lunas {{ $status==='lunas' ? 'c-lunas' : ($status==='sebagian' ? 'c-sebagian' : 'c-belum') }}" title="{{ $bulanFull[$b] }}: {{ $status }}">
+                                    {{ $status==='lunas' ? '✓' : ($status==='sebagian' ? '◑' : '✗') }}
+                                </span>
                             </td>
-                        </tr>
-                        @empty
+                        @endfor
+                        <td class="total-cell" style="background:#f0fdf4;" class="dark:bg-emerald-900/10">
+                            @if($totalBayar>=$totalTagihan)
+                                <span class="total-lunas">Lunas ✓</span>
+                            @else
+                                <span class="total-sisa">-Rp{{ number_format($totalTagihan-$totalBayar,0,',','.') }}</span>
+                            @endif
+                        </td>
+                    </tr>
+                    @empty
                         <tr>
                             <td colspan="17" style="padding:48px 24px;text-align:center;color:#94a3b8;">
                                 <p style="font-weight:600;margin:0 0 4px;">Belum ada data santri</p>
                                 <p style="font-size:0.8rem;margin:0;">Coba ubah filter kelas atau tahun</p>
                             </td>
                         </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
-            {{-- Legend --}}
-            <div class="legend">
-                <div class="legend-item"><span class="legend-dot c-lunas">✓</span> Lunas</div>
-                <div class="legend-item"><span class="legend-dot c-sebagian">◑</span> Sebagian</div>
-                <div class="legend-item"><span class="legend-dot c-belum">✗</span> Belum Bayar</div>
-                <div style="margin-left:auto;color:#94a3b8;font-size:0.75rem;align-self:center;">{{ $totalSantri }} santri ditampilkan</div>
-            </div>
+        {{-- Legend --}}
+        <div class="legend">
+            <div class="legend-item"><span class="legend-dot c-lunas">✓</span> Lunas</div>
+            <div class="legend-item"><span class="legend-dot c-sebagian">◑</span> Sebagian</div>
+            <div class="legend-item"><span class="legend-dot c-belum">✗</span> Belum Bayar</div>
+            <div style="margin-left:auto;color:#94a3b8;font-size:0.75rem;align-self:center;">{{ $totalSantri }} santri ditampilkan</div>
         </div>
 
     </div>

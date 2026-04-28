@@ -5,6 +5,7 @@ use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\SppController;
 use App\Http\Controllers\IzinController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\SantriController;
 use App\Http\Controllers\Admin\JadwalAbsenController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Santri;
@@ -58,6 +59,18 @@ Route::middleware(['auth', 'role:superadmin,guru'])->group(function () {
 // ─────────────────────────────────────────────────────────────────────────────
 Route::middleware(['auth', 'role:superadmin'])->group(function () {
 
+    // Manajemen Santri
+    Route::prefix('admin/santri')->as('admin.santri.')->group(function () {
+        Route::get('/', [SantriController::class, 'index'])->name('index');
+        Route::get('/create', [SantriController::class, 'create'])->name('create');
+        Route::post('/', [SantriController::class, 'store'])->name('store');
+        Route::post('/import', [SantriController::class, 'import'])->name('import');
+        Route::get('/{santri}', [SantriController::class, 'show'])->name('show');
+        Route::get('/{santri}/edit', [SantriController::class, 'edit'])->name('edit');
+        Route::put('/{santri}', [SantriController::class, 'update'])->name('update');
+        Route::delete('/{santri}', [SantriController::class, 'destroy'])->name('destroy');
+    });
+
     // Manajemen User
     Route::prefix('admin/users')->as('admin.users.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
@@ -89,41 +102,8 @@ Route::middleware(['auth', 'role:superadmin'])->group(function () {
         Route::get('/riwayat', [SppController::class, 'riwayat'])->name('riwayat');
     });
 
-    // Import CSV Santri
-    Route::get('/import-santri', function () {
-        $path = storage_path('app/public/santri.csv');
+    // Import lama dipindah ke SantriController::import
 
-        if (!file_exists($path)) {
-            return "❌ File CSV tidak ditemukan di: $path";
-        }
-
-        $file = fopen($path, 'r');
-        $isFirstRow = true;
-        $count = 0;
-
-        while (($data = fgetcsv($file, 1000, ',')) !== FALSE) {
-            if ($isFirstRow) {
-                $isFirstRow = false;
-                continue;
-            }
-
-            $nis  = trim($data[0]);
-            $nama = trim($data[1]);
-            $kelas = trim($data[2] ?? '');
-
-            if (!$nis || !$nama) continue;
-
-            Santri::updateOrCreate(
-                ['nis' => $nis],
-                ['nama' => $nama, 'kelas' => $kelas]
-            );
-
-            $count++;
-        }
-
-        fclose($file);
-        return "✅ Import selesai! Jumlah data masuk: {$count}";
-    });
 });
 
 require __DIR__.'/auth.php';

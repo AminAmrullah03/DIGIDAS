@@ -6,7 +6,7 @@
   "orientation": "any",
   "scope": "/",
   "short_name": "DIGIDAS",
-  "start_url": "/",
+  "start_url": "/login",
   "theme_color": "#31c708",
   "icons": [
     {

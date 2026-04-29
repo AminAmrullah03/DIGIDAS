@@ -101,6 +101,9 @@ Route::middleware(['auth', 'role:superadmin'])->group(function () {
         Route::post('/bayar', [SppController::class, 'store'])->name('store');
         Route::get('/riwayat', [SppController::class, 'riwayat'])->name('riwayat');
     });
+    Route::get('/offline', function () {
+        return view('offline');
+    })->name('offline');
 
     // Import lama dipindah ke SantriController::import
 

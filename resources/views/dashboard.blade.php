@@ -3,6 +3,14 @@
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
     .dash-root { font-family: 'Plus Jakarta Sans', sans-serif; }
 
+    /* ── Page background ── */
+    .dash-bg {
+        min-height: 100vh;
+        background: #f0f4f8;
+        background-image: radial-gradient(ellipse 70% 40% at 60% 0%, rgba(16,185,129,0.07) 0%, transparent 60%);
+        padding: 32px 0 48px;
+    }
+
     /* ── Welcome banner ── */
     .welcome-banner {
         position: relative;
@@ -31,163 +39,113 @@
         background: rgba(6,78,59,0.4);
         pointer-events: none;
     }
-    .welcome-title {
-        font-size: 1.6rem;
-        font-weight: 700;
-        color: #fff;
-        margin: 0 0 6px;
-        position: relative; z-index: 1;
-    }
-    .welcome-sub {
-        color: #6ee7b7;
-        font-size: 0.9rem;
-        margin: 0;
-        position: relative; z-index: 1;
-    }
+    .welcome-title { font-size: 1.6rem; font-weight: 700; color: #fff; margin: 0 0 6px; position: relative; z-index: 1; }
+    .welcome-sub   { color: #6ee7b7; font-size: 0.9rem; margin: 0; position: relative; z-index: 1; }
     .date-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        background: rgba(0,0,0,0.2);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(16,185,129,0.3);
-        border-radius: 14px;
-        padding: 10px 16px;
-        color: #fff;
-        position: relative; z-index: 1;
+        display: inline-flex; align-items: center; gap: 10px;
+        background: rgba(0,0,0,0.2); backdrop-filter: blur(8px);
+        border: 1px solid rgba(16,185,129,0.3); border-radius: 14px;
+        padding: 10px 16px; color: #fff; position: relative; z-index: 1;
     }
     .date-chip-label { font-size: 0.7rem; color: #6ee7b7; }
     .date-chip-val   { font-size: 0.85rem; font-weight: 600; }
 
     /* ── Section heading ── */
-    .section-heading {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 16px;
-    }
+    .section-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
     .section-icon {
-        width: 34px; height: 34px;
-        border-radius: 10px;
-        display: flex; align-items: center; justify-content: center;
-        flex-shrink: 0;
+        width: 34px; height: 34px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    .section-heading h2 {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin: 0;
-    }
-    .dark .section-heading h2 { color: #f1f5f9; }
+    .section-heading h2 { font-size: 1rem; font-weight: 700; color: #1e293b; margin: 0; }
 
-    /* ── Cards ── */
+    /* ── Cards — clean light style ── */
     .dash-card {
-        display: flex;
-        align-items: flex-start;
-        gap: 16px;
-        background: #fff;
-        border-radius: 16px;
-        padding: 20px;
-        border: 1.5px solid #e2e8f0;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        display: flex; align-items: flex-start; gap: 16px;
+        background: #ffffff;
+        border-radius: 16px; padding: 20px;
+        border: 1.5px solid transparent;
         text-decoration: none;
         transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
-        position: relative;
-        overflow: hidden;
+        position: relative; overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
     }
-    .dark .dash-card { background: #1e293b; border-color: #334155; }
     .dash-card::before {
         content: '';
-        position: absolute;
-        inset: 0;
+        position: absolute; top: 0; left: 0; right: 0;
+        height: 3px; border-radius: 16px 16px 0 0;
+        background: var(--accent);
         opacity: 0;
         transition: opacity 0.22s;
     }
     .dash-card:hover {
         transform: translateY(-3px);
-        box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+        box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+        border-color: var(--accent-border);
     }
     .dash-card:hover::before { opacity: 1; }
 
     /* Color variants */
-    .card-green  { --accent: #10b981; --accent-bg: #ecfdf5; --accent-dark-bg: rgba(16,185,129,0.1); }
-    .card-green:hover  { border-color: #10b981; box-shadow: 0 12px 32px rgba(16,185,129,0.18); }
-    .card-green::before  { background: linear-gradient(135deg, rgba(16,185,129,0.04), transparent); }
+    .card-green   { --accent: #10b981; --accent-border: rgba(16,185,129,0.3); --accent-light: #059669; }
+    .card-teal    { --accent: #0d9488; --accent-border: rgba(13,148,136,0.3); --accent-light: #0d9488; }
+    .card-emerald { --accent: #059669; --accent-border: rgba(5,150,105,0.3);  --accent-light: #059669; }
+    .card-lime    { --accent: #65a30d; --accent-border: rgba(101,163,13,0.3); --accent-light: #65a30d; }
+    .card-violet  { --accent: #8b5cf6; --accent-border: rgba(139,92,246,0.3); --accent-light: #7c3aed; }
+    .card-sky     { --accent: #0ea5e9; --accent-border: rgba(14,165,233,0.3); --accent-light: #0284c7; }
 
-    .card-teal   { --accent: #0d9488; --accent-bg: #f0fdfa; --accent-dark-bg: rgba(13,148,136,0.1); }
-    .card-teal:hover   { border-color: #0d9488; box-shadow: 0 12px 32px rgba(13,148,136,0.18); }
-    .card-teal::before   { background: linear-gradient(135deg, rgba(13,148,136,0.04), transparent); }
-
-    .card-emerald { --accent: #059669; --accent-bg: #ecfdf5; --accent-dark-bg: rgba(5,150,105,0.1); }
-    .card-emerald:hover { border-color: #059669; box-shadow: 0 12px 32px rgba(5,150,105,0.18); }
-    .card-emerald::before { background: linear-gradient(135deg, rgba(5,150,105,0.04), transparent); }
-
-    .card-lime   { --accent: #65a30d; --accent-bg: #f7fee7; --accent-dark-bg: rgba(101,163,13,0.1); }
-    .card-lime:hover   { border-color: #65a30d; box-shadow: 0 12px 32px rgba(101,163,13,0.18); }
-    .card-lime::before   { background: linear-gradient(135deg, rgba(101,163,13,0.04), transparent); }
-
-    .card-slate  { --accent: #475569; --accent-bg: #f8fafc; --accent-dark-bg: rgba(71,85,105,0.1); }
-    .card-slate:hover  { border-color: #475569; box-shadow: 0 12px 32px rgba(71,85,105,0.15); }
-    .card-slate::before  { background: linear-gradient(135deg, rgba(71,85,105,0.03), transparent); }
-
+    /* Icon wrap */
     .card-icon-wrap {
-        width: 52px; height: 52px;
-        border-radius: 14px;
-        background: var(--accent-bg);
+        width: 52px; height: 52px; border-radius: 14px;
+        background: var(--accent-bg, #f0fdf4);
         display: flex; align-items: center; justify-content: center;
         flex-shrink: 0;
-        transition: background 0.2s, transform 0.2s;
+        transition: transform 0.2s, box-shadow 0.2s;
     }
-    .dark .card-icon-wrap { background: var(--accent-dark-bg); }
-    .dash-card:hover .card-icon-wrap { transform: scale(1.08); }
-
+    .card-green   .card-icon-wrap { background: #ecfdf5; }
+    .card-teal    .card-icon-wrap { background: #f0fdfa; }
+    .card-emerald .card-icon-wrap { background: #ecfdf5; }
+    .card-lime    .card-icon-wrap { background: #f7fee7; }
+    .card-violet  .card-icon-wrap { background: #f5f3ff; }
+    .card-sky     .card-icon-wrap { background: #f0f9ff; }
+    .dash-card:hover .card-icon-wrap { transform: scale(1.08); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     .card-icon-wrap svg { color: var(--accent); }
 
     .card-title {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #1e293b;
-        margin: 0 0 4px;
+        font-size: 0.95rem; font-weight: 600;
+        color: #1e293b; margin: 0 0 4px;
         transition: color 0.2s;
     }
-    .dark .card-title { color: #f1f5f9; }
-    .dash-card:hover .card-title { color: var(--accent); }
-
-    .card-desc {
-        font-size: 0.8rem;
-        color: #64748b;
-        margin: 0;
-        line-height: 1.4;
-    }
-    .dark .card-desc { color: #94a3b8; }
+    .dash-card:hover .card-title { color: var(--accent-light); }
+    .card-desc { font-size: 0.8rem; color: #94a3b8; margin: 0; line-height: 1.4; }
 
     .card-arrow {
-        flex-shrink: 0;
-        color: #cbd5e1;
-        transition: color 0.2s, transform 0.2s;
-        margin-top: 2px;
+        flex-shrink: 0; color: #cbd5e1;
+        transition: color 0.2s, transform 0.2s; margin-top: 2px;
     }
     .dash-card:hover .card-arrow { color: var(--accent); transform: translateX(3px); }
+
+    /* ── Section divider ── */
+    .section-divider {
+        height: 1px;
+        background: #e2e8f0;
+        margin: 0 0 28px;
+    }
+
+    /* ── Section label icon bg ── */
+    .section-icon-green  { background: #ecfdf5; }
+    .section-icon-violet { background: #f5f3ff; }
 
     /* ── Tips card ── */
     .tips-card {
         background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
-        border: 1px solid rgba(16,185,129,0.2);
-        border-radius: 16px;
-        padding: 20px 24px;
-        display: flex;
-        align-items: flex-start;
-        gap: 14px;
-        margin-top: 24px;
+        border: 1px solid rgba(16,185,129,0.25);
+        border-radius: 16px; padding: 20px 24px;
+        display: flex; align-items: flex-start; gap: 14px;
+        margin-top: 8px;
+        box-shadow: 0 1px 6px rgba(16,185,129,0.08);
     }
-    .dark .tips-card { background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(6,78,59,0.15)); border-color: rgba(16,185,129,0.15); }
-
-    /* ── Divider ── */
-    .section-divider { height: 1px; background: #f1f5f9; margin: 0 0 24px; }
-    .dark .section-divider { background: #1e293b; }
 </style>
 
-<div class="dash-root min-h-screen bg-slate-50 dark:bg-gray-900 py-6 sm:py-10">
+<div class="dash-root dash-bg">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {{-- ── Welcome Banner ── --}}
@@ -211,7 +169,7 @@
 
         {{-- ── Absensi ── --}}
         <div class="section-heading">
-            <div class="section-icon" style="background:#ecfdf5;">
+            <div class="section-icon section-icon-green">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#10b981" style="width:18px;height:18px;">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
@@ -247,7 +205,7 @@
             </a>
 
             @if(Auth::user()->isSuperAdmin())
-            <a href="{{ route('jadwal.index') }}" class="dash-card card-emerald">
+            <a href="{{ route('jadwal.index') }}" class="dash-card card-sky">
                 <div class="card-icon-wrap">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:26px;height:26px;">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
@@ -266,8 +224,8 @@
         @if(Auth::user()->isSuperAdmin())
         <div class="section-divider"></div>
         <div class="section-heading">
-            <div class="section-icon" style="background:#ecfdf5;">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#059669" style="width:18px;height:18px;">
+            <div class="section-icon section-icon-green">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#10b981" style="width:18px;height:18px;">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75"/>
                 </svg>
             </div>
@@ -318,7 +276,7 @@
         {{-- ── Perizinan ── --}}
         <div class="section-divider"></div>
         <div class="section-heading">
-            <div class="section-icon" style="background:#ecfdf5;">
+            <div class="section-icon section-icon-green">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#10b981" style="width:18px;height:18px;">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/>
                 </svg>
@@ -357,15 +315,15 @@
         @if(Auth::user()->isSuperAdmin())
         <div class="section-divider"></div>
         <div class="section-heading">
-            <div class="section-icon" style="background:#ecfdf5;">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#059669" style="width:18px;height:18px;">
+            <div class="section-icon section-icon-violet">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#a78bfa" style="width:18px;height:18px;">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 7a4 4 0 100 8 4 4 0 000-8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
                 </svg>
             </div>
             <h2>Manajemen User</h2>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            <a href="{{ route('admin.users.index') }}" class="dash-card card-emerald">
+            <a href="{{ route('admin.users.index') }}" class="dash-card card-violet">
                 <div class="card-icon-wrap">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:26px;height:26px;">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
@@ -378,7 +336,7 @@
                 <svg class="card-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
             </a>
 
-            <a href="{{ route('admin.santri.index') }}" class="dash-card card-emerald">
+            <a href="{{ route('admin.santri.index') }}" class="dash-card card-violet">
                 <div class="card-icon-wrap">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:26px;height:26px;">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
@@ -395,14 +353,14 @@
 
         {{-- ── Tips ── --}}
         <div class="tips-card">
-            <div style="width:40px;height:40px;border-radius:12px;background:rgba(16,185,129,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <div style="width:40px;height:40px;border-radius:12px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#10b981" style="width:20px;height:20px;">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/>
                 </svg>
             </div>
             <div>
-                <p style="font-weight:600;color:#065f46;font-size:0.875rem;margin:0 0 4px;" class="dark:text-emerald-300">Tips Penggunaan</p>
-                <p style="font-size:0.8rem;color:#047857;margin:0;line-height:1.5;" class="dark:text-emerald-400">Pastikan kamera device berfungsi dengan baik untuk scan QR Code. Absensi hanya bisa dilakukan pada waktu yang sudah dijadwalkan.</p>
+                <p style="font-weight:600;color:#065f46;font-size:0.875rem;margin:0 0 4px;">Tips Penggunaan</p>
+                <p style="font-size:0.8rem;color:#047857;margin:0;line-height:1.5;">Pastikan kamera device berfungsi dengan baik untuk scan QR Code. Absensi hanya bisa dilakukan pada waktu yang sudah dijadwalkan.</p>
             </div>
         </div>
 

@@ -63,15 +63,32 @@
         border-radius: 999px;
         box-shadow: 0 0 8px #10b981;
     }
-    .nav-pill svg { flex-shrink: 0; opacity: 0.8; transition: opacity 0.2s, transform 0.2s; }
-    .nav-pill:hover svg, .nav-pill.active svg { opacity: 1; transform: scale(1.1); }
+    /* Icon dalam nav-pill (bukan chevron): scale on hover/active */
+    .nav-pill svg:not(.chevron) { flex-shrink: 0; opacity: 0.8; transition: opacity 0.2s, transform 0.2s; }
+    .nav-pill:hover svg:not(.chevron), .nav-pill.active svg:not(.chevron) { opacity: 1; transform: scale(1.1); }
+    /* Button nav-pill reset */
+    button.nav-pill {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        outline: none;
+        font-family: inherit;
+    }
+    button.nav-pill:focus { outline: none; }
+    /* Chevron: hanya rotate, tidak scale */
+    button.nav-pill .chevron { flex-shrink: 0; opacity: 0.55; transition: transform 0.2s; }
+    button.nav-pill:hover .chevron, button.nav-pill.active .chevron { opacity: 0.9; }
+    /* Admin pill: ungu saat tidak active */
+    .nav-pill.admin-pill { color: #a78bfa; }
+    .nav-pill.admin-pill:hover { color: #fff; }
+    .nav-pill.admin-pill.active { color: #fff; }
 
     /* ── User dropdown trigger ── */
     .user-trigger {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 6px 12px 6px 6px;
+        gap: 9px;
+        padding: 5px 10px 5px 5px;
         border-radius: 12px;
         background: rgba(255,255,255,0.05);
         border: 1px solid rgba(255,255,255,0.08);
@@ -80,29 +97,46 @@
         color: #e2e8f0;
         font-size: 0.8125rem;
         font-weight: 500;
+        font-family: inherit;
+        outline: none;
+        white-space: nowrap;
     }
     .user-trigger:hover {
-        background: rgba(16,185,129,0.12);
+        background: rgba(16,185,129,0.1);
         border-color: rgba(16,185,129,0.3);
-        color: #fff;
+        box-shadow: 0 4px 16px rgba(16,185,129,0.12);
     }
+    .user-trigger:focus { outline: none; }
     .user-avatar {
-        width: 30px; height: 30px;
-        border-radius: 8px;
+        width: 32px; height: 32px;
+        border-radius: 9px;
         background: linear-gradient(135deg, #10b981, #059669);
         display: flex; align-items: center; justify-content: center;
         font-size: 0.75rem; font-weight: 700; color: #fff;
         flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(16,185,129,0.35);
     }
+    .user-info { text-align: left; line-height: 1.25; }
+    .user-info-name { color: #f1f5f9; font-size: 0.8rem; font-weight: 600; max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
+    .user-chevron {
+        width: 14px; height: 14px;
+        color: #64748b;
+        transition: transform 0.2s, color 0.2s;
+        flex-shrink: 0;
+        margin-left: 2px;
+    }
+    .user-trigger:hover .user-chevron { color: #94a3b8; }
     .role-badge {
-        font-size: 0.65rem;
-        font-weight: 600;
-        padding: 1px 6px;
+        display: inline-block;
+        font-size: 0.6rem;
+        font-weight: 700;
+        padding: 1px 5px;
         border-radius: 999px;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
+        margin-top: 2px;
     }
-    .role-badge.superadmin { background: rgba(167,139,250,0.2); color: #a78bfa; border: 1px solid rgba(167,139,250,0.3); }
+    .role-badge.superadmin { background: rgba(167,139,250,0.18); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.3); }
     .role-badge.guru { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.25); }
 
     /* ── Dropdown ── */
@@ -146,6 +180,13 @@
         padding-left: 20px;
     }
     .nav-dropdown .divider { height: 1px; background: rgba(255,255,255,0.06); margin: 4px 0; }
+    .nav-dropdown a.active-item, .nav-dropdown a.active-item:hover {
+        color: #10b981;
+        background: rgba(16,185,129,0.12);
+        padding-left: 20px;
+        font-weight: 600;
+    }
+    .mobile-pill.mobile-sub { padding-left: 32px; font-size: 0.85rem; }
 
     /* ── Mobile menu ── */
     .mobile-menu {
@@ -199,59 +240,105 @@
                         Dashboard
                     </a>
 
-                    {{-- Absensi --}}
-                    <a href="{{ route('absen') }}" class="nav-pill {{ request()->routeIs('absen') ? 'active' : '' }}">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-                        Absensi
-                    </a>
+                    {{-- Dropdown: Absensi --}}
+                    <div class="nav-dropdown-wrap" x-data="{ absenOpen: false }" @click.outside="absenOpen = false" style="position:relative;">
+                        <button @click="absenOpen = !absenOpen"
+                            class="nav-pill {{ request()->routeIs('absen') || request()->routeIs('rekap') ? 'active' : '' }}"
+                            :class="{ 'active': absenOpen }">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                            Absensi
+                            <svg class="chevron" :style="absenOpen ? 'transform:rotate(180deg)' : ''" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                        </button>
+                        <div x-show="absenOpen" class="nav-dropdown" style="display:none;left:0;right:auto;min-width:180px;">
+                            <div style="padding:4px 0;">
+                                <a href="{{ route('absen') }}" class="{{ request()->routeIs('absen') ? 'active-item' : '' }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+                                    Scan Absensi
+                                </a>
+                                <a href="{{ route('rekap') }}" class="{{ request()->routeIs('rekap') ? 'active-item' : '' }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                    Rekap Absensi
+                                </a>
+                            </div>
+                        </div>
+                    </div>
 
-                    {{-- Rekap --}}
-                    <a href="{{ route('rekap') }}" class="nav-pill {{ request()->routeIs('rekap') ? 'active' : '' }}">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                        Rekap
-                    </a>
+                    {{-- Dropdown: Perizinan --}}
+                    <div class="nav-dropdown-wrap" x-data="{ izinOpen: false }" @click.outside="izinOpen = false" style="position:relative;">
+                        <button @click="izinOpen = !izinOpen"
+                            class="nav-pill {{ request()->routeIs('izin.*') ? 'active' : '' }}"
+                            :class="{ 'active': izinOpen }">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            Perizinan
+                            <svg class="chevron" :style="izinOpen ? 'transform:rotate(180deg)' : ''" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                        </button>
+                        <div x-show="izinOpen" class="nav-dropdown" style="display:none;left:0;right:auto;min-width:180px;">
+                            <div style="padding:4px 0;">
+                                <a href="{{ route('izin.index') }}" class="{{ request()->routeIs('izin.index') ? 'active-item' : '' }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    Input Izin
+                                </a>
+                                <a href="{{ route('izin.rekap') }}" class="{{ request()->routeIs('izin.rekap') ? 'active-item' : '' }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                    Rekap Izin
+                                </a>
+                            </div>
+                        </div>
+                    </div>
 
-                    {{-- Izin --}}
-                    <a href="{{ route('izin.index') }}" class="nav-pill {{ request()->routeIs('izin.*') ? 'active' : '' }}">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        Izin
-                    </a>
-
-                    {{-- Superadmin only --}}
+                    {{-- Dropdown: Admin (superadmin only) --}}
                     @if(Auth::user()->isSuperAdmin())
-                        <a href="{{ route('jadwal.index') }}" class="nav-pill {{ request()->routeIs('jadwal.*') ? 'active' : '' }}">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                            Jadwal
-                        </a>
-                        <a href="{{ route('spp.rekap') }}" class="nav-pill {{ request()->routeIs('spp.*') ? 'active' : '' }}">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-                            SPP
-                        </a>
-                        <a href="{{ route('admin.users.index') }}" class="nav-pill {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-                            User
-                        </a>
-                        <a href="{{ route('admin.santri.index') }}" class="nav-pill {{ request()->routeIs('admin.santri.*') ? 'active' : '' }}">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
-                            Santri
-                        </a>
+                    <div class="nav-dropdown-wrap" x-data="{ adminOpen: false }" @click.outside="adminOpen = false" style="position:relative;">
+                        <button @click="adminOpen = !adminOpen"
+                            class="nav-pill admin-pill {{ request()->routeIs('jadwal.*') || request()->routeIs('spp.*') || request()->routeIs('admin.users.*') || request()->routeIs('admin.santri.*') || request()->routeIs('admin.santri.kelola-kelas') ? 'active' : '' }}"
+                            :class="{ 'active': adminOpen }">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            Admin
+                            <svg class="chevron" :style="adminOpen ? 'transform:rotate(180deg)' : ''" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                        </button>
+                        <div x-show="adminOpen" class="nav-dropdown" style="display:none;left:0;right:auto;min-width:190px;">
+                            <div style="padding:6px 16px 6px;border-bottom:1px solid rgba(167,139,250,0.15);">
+                                <div style="font-size:0.65rem;color:#a78bfa;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;">Panel Admin</div>
+                            </div>
+                            <div style="padding:4px 0;">
+                                <a href="{{ route('jadwal.index') }}" class="{{ request()->routeIs('jadwal.*') ? 'active-item' : '' }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                    Jadwal
+                                </a>
+                                <a href="{{ route('spp.rekap') }}" class="{{ request()->routeIs('spp.*') ? 'active-item' : '' }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                                    SPP
+                                </a>
+                                <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active-item' : '' }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                                    Kelola User
+                                </a>
+                                <a href="{{ route('admin.santri.index') }}" class="{{ request()->routeIs('admin.santri.index') ? 'active-item' : '' }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                                    Santri
+                                </a>
+                                <a href="{{ route('admin.santri.kelola-kelas') }}" class="{{ request()->routeIs('admin.santri.kelola-kelas') ? 'active-item' : '' }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17h7m-3.5-3.5v7"/></svg>
+                                    Kelola Kelas
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                     @endif
                 </div>
             </div>
 
             {{-- ── User Dropdown ── --}}
-            <div class="hidden sm:flex items-center" x-data="{ dropOpen: false }" @click.outside="dropOpen = false">
+            <div class="hidden sm:flex items-center" style="position:relative;" x-data="{ dropOpen: false }" @click.outside="dropOpen = false">
                 <button @click="dropOpen = !dropOpen" class="user-trigger">
                     <div class="user-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 2)) }}</div>
-                    <div style="text-align:left;line-height:1.2;">
-                        <div style="color:#f1f5f9;font-size:0.8rem;font-weight:600;">{{ Str::limit(Auth::user()->name, 16) }}</div>
-                        <div>
-                            <span class="role-badge {{ Auth::user()->isSuperAdmin() ? 'superadmin' : 'guru' }}">
-                                {{ Auth::user()->isSuperAdmin() ? 'Superadmin' : 'Guru' }}
-                            </span>
-                        </div>
+                    <div class="user-info">
+                        <div class="user-info-name">{{ Str::limit(Auth::user()->name, 18) }}</div>
+                        <span class="role-badge {{ Auth::user()->isSuperAdmin() ? 'superadmin' : 'guru' }}">
+                            {{ Auth::user()->isSuperAdmin() ? 'Superadmin' : 'Guru' }}
+                        </span>
                     </div>
-                    <svg style="width:14px;height:14px;color:#64748b;transition:transform 0.2s;" :style="dropOpen ? 'transform:rotate(180deg)' : ''" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                    <svg class="user-chevron" :style="dropOpen ? 'transform:rotate(180deg)' : ''" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                 </button>
 
                 <div x-show="dropOpen" class="nav-dropdown" style="display:none;">
@@ -289,39 +376,60 @@
     {{-- ── Mobile Menu ── --}}
     <div x-show="open" class="mobile-menu sm:hidden" style="display:none;">
         <div style="padding:8px 0 4px;">
+
+            {{-- Dashboard --}}
             <a href="{{ route('dashboard') }}" class="mobile-pill {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                 Dashboard
             </a>
-            <a href="{{ route('absen') }}" class="mobile-pill {{ request()->routeIs('absen') ? 'active' : '' }}">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-                Absensi
+
+            {{-- Absensi Section --}}
+            <div style="height:1px;background:rgba(255,255,255,0.06);margin:4px 20px;"></div>
+            <div style="padding:6px 20px 4px;font-size:0.65rem;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;">Absensi</div>
+            <a href="{{ route('absen') }}" class="mobile-pill mobile-sub {{ request()->routeIs('absen') ? 'active' : '' }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+                Scan Absensi
             </a>
-            <a href="{{ route('rekap') }}" class="mobile-pill {{ request()->routeIs('rekap') ? 'active' : '' }}">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                Rekap
+            <a href="{{ route('rekap') }}" class="mobile-pill mobile-sub {{ request()->routeIs('rekap') ? 'active' : '' }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Rekap Absensi
             </a>
-            <a href="{{ route('izin.index') }}" class="mobile-pill {{ request()->routeIs('izin.*') ? 'active' : '' }}">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                Izin
+
+            {{-- Perizinan Section --}}
+            <div style="height:1px;background:rgba(255,255,255,0.06);margin:4px 20px;"></div>
+            <div style="padding:6px 20px 4px;font-size:0.65rem;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;">Perizinan</div>
+            <a href="{{ route('izin.index') }}" class="mobile-pill mobile-sub {{ request()->routeIs('izin.index') ? 'active' : '' }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Input Izin
             </a>
+            <a href="{{ route('izin.rekap') }}" class="mobile-pill mobile-sub {{ request()->routeIs('izin.rekap') ? 'active' : '' }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Rekap Izin
+            </a>
+
+            {{-- Admin Section (superadmin only) --}}
             @if(Auth::user()->isSuperAdmin())
-                <div style="height:1px;background:rgba(255,255,255,0.06);margin:6px 20px;"></div>
-                <a href="{{ route('jadwal.index') }}" class="mobile-pill {{ request()->routeIs('jadwal.*') ? 'active' : '' }}">
+                <div style="height:1px;background:rgba(167,139,250,0.2);margin:4px 20px;"></div>
+                <div style="padding:6px 20px 4px;font-size:0.65rem;color:#a78bfa;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;">Admin</div>
+                <a href="{{ route('jadwal.index') }}" class="mobile-pill mobile-sub {{ request()->routeIs('jadwal.*') ? 'active' : '' }}">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     Jadwal
                 </a>
-                <a href="{{ route('spp.rekap') }}" class="mobile-pill {{ request()->routeIs('spp.*') ? 'active' : '' }}">
+                <a href="{{ route('spp.rekap') }}" class="mobile-pill mobile-sub {{ request()->routeIs('spp.*') ? 'active' : '' }}">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
                     SPP
                 </a>
-                <a href="{{ route('admin.users.index') }}" class="mobile-pill {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.users.index') }}" class="mobile-pill mobile-sub {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-                    User
+                    Kelola User
                 </a>
-                <a href="{{ route('admin.santri.index') }}" class="mobile-pill {{ request()->routeIs('admin.santri.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.santri.index') }}" class="mobile-pill mobile-sub {{ request()->routeIs('admin.santri.index') ? 'active' : '' }}">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
                     Santri
+                </a>
+                <a href="{{ route('admin.santri.kelola-kelas') }}" class="mobile-pill mobile-sub {{ request()->routeIs('admin.santri.kelola-kelas') ? 'active' : '' }}">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17h7m-3.5-3.5v7"/></svg>
+                    Kelola Kelas
                 </a>
             @endif
         </div>

@@ -71,6 +71,7 @@ Route::middleware(['auth', 'role:superadmin'])->group(function () {
         Route::get('/{santri}/edit', [SantriController::class, 'edit'])->name('edit');
         Route::put('/{santri}', [SantriController::class, 'update'])->name('update');
         Route::delete('/{santri}', [SantriController::class, 'destroy'])->name('destroy');
+        Route::patch('/bulk-update', [SantriController::class, 'bulkUpdate'])->name('bulk-update');
     });
 
     // Manajemen User

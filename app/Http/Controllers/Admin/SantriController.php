@@ -196,4 +196,49 @@ class SantriController extends Controller
         return redirect()->route('admin.santri.kelola-kelas')
             ->with('success', "{$updated} data kelas santri berhasil diperbarui.");
     }
+
+    /**
+     * Bulk update: ubah status, jenjang, gender, atau tanggal_masuk
+     * untuk banyak santri sekaligus.
+     *
+     * Tambahkan method ini di dalam class SantriController,
+     * setelah method destroy().
+     */
+    public function bulkUpdate(Request $request)
+    {
+        $request->validate([
+            'nis'           => 'required|array|min:1',
+            'nis.*'         => 'required|string|exists:santri,nis',
+            'status'        => 'nullable|in:aktif,lulus,mutasi,dikeluarkan,wafat',
+            'jenjang'       => 'nullable|in:Reguler,Tahfidz',
+            'gender'        => 'nullable|in:PA,PI',
+            'tanggal_masuk' => 'nullable|date',
+        ]);
+
+        // Kumpulkan field yang benar-benar diisi (tidak kosong)
+        $updates = array_filter([
+            'status'        => $request->status,
+            'jenjang'       => $request->jenjang,
+            'gender'        => $request->gender,
+            'tanggal_masuk' => $request->tanggal_masuk,
+        ]);
+
+        if (empty($updates)) {
+            return redirect()->route('admin.santri.index')
+                ->with('error', 'Tidak ada field yang diubah.');
+        }
+
+        $count = Santri::whereIn('nis', $request->nis)->update($updates);
+
+        $fieldLabels = [
+            'status'        => 'Status',
+            'jenjang'       => 'Jenjang',
+            'gender'        => 'Gender',
+            'tanggal_masuk' => 'Tanggal Masuk',
+        ];
+        $changedFields = implode(', ', array_map(fn($k) => $fieldLabels[$k], array_keys($updates)));
+
+        return redirect()->route('admin.santri.index')
+            ->with('success', "{$count} santri berhasil diperbarui ({$changedFields}).");
+    }
 }

@@ -6,13 +6,11 @@ use App\Http\Controllers\Api\IzinController;
 use App\Http\Controllers\Api\JadwalAbsenController;
 use App\Http\Controllers\Api\SantriController;
 use App\Http\Controllers\Api\SppController;
+use App\Support\ApiResponse;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/ping', function () {
-    return response()->json([
-        'success' => true,
-        'message' => 'API hidup',
-    ]);
+    return ApiResponse::success(null, 'API hidup');
 });
 
 Route::post('/login', [AuthController::class, 'login']);

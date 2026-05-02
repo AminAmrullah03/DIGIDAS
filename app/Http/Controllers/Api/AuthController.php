@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -22,8 +22,8 @@ class AuthController extends Controller
         $user = User::where('nip', $credentials['nip'])->first();
 
         if (! $user || ! Hash::check($credentials['password'], $user->password)) {
-            throw ValidationException::withMessages([
-                'nip' => 'NIP atau password yang Anda masukkan salah.',
+            return ApiResponse::error('NIP atau password yang Anda masukkan salah.', 422, [
+                'nip' => ['NIP atau password yang Anda masukkan salah.'],
             ]);
         }
 
@@ -31,19 +31,16 @@ class AuthController extends Controller
             ?? $request->userAgent()
             ?? 'flutter-android';
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Login berhasil.',
+        return ApiResponse::success([
             'token_type' => 'Bearer',
             'token' => $user->createToken($deviceName)->plainTextToken,
             'user' => $this->userPayload($user),
-        ]);
+        ], 'Login berhasil.');
     }
 
     public function me(Request $request): JsonResponse
     {
-        return response()->json([
-            'success' => true,
+        return ApiResponse::success([
             'user' => $this->userPayload($request->user()),
         ]);
     }
@@ -52,20 +49,14 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()?->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Logout berhasil.',
-        ]);
+        return ApiResponse::success(null, 'Logout berhasil.');
     }
 
     public function logoutAll(Request $request): JsonResponse
     {
         $request->user()->tokens()->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Semua token berhasil dicabut.',
-        ]);
+        return ApiResponse::success(null, 'Semua token berhasil dicabut.');
     }
 
     private function userPayload(User $user): array

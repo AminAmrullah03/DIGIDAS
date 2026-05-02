@@ -53,7 +53,7 @@ Body:
 }
 ```
 
-Response sukses berisi `token`, `token_type`, dan `user`. Simpan token di secure storage Flutter.
+Response sukses berisi `data.token`, `data.token_type`, dan `data.user`. Simpan token di secure storage Flutter.
 
 ### User Aktif
 
@@ -175,13 +175,34 @@ Body pembayaran:
 
 ## Format Error
 
-Validasi Laravel akan mengembalikan HTTP `422` dengan field `errors`.
+Semua response API memakai envelope yang sama:
+
+```json
+{
+  "success": true,
+  "message": "OK",
+  "data": {}
+}
+```
+
+Response list biasanya menambahkan `meta.pagination`. Validasi Laravel akan mengembalikan HTTP `422` dengan field `errors`.
 
 Role tidak sesuai akan mengembalikan:
 
 ```json
 {
   "success": false,
-  "message": "Akses ditolak. Anda tidak memiliki izin."
+  "message": "Akses ditolak. Anda tidak memiliki izin.",
+  "data": null
+}
+```
+
+Token kosong, salah, atau sudah logout akan mengembalikan HTTP `401`:
+
+```json
+{
+  "success": false,
+  "message": "Unauthenticated.",
+  "data": null
 }
 ```

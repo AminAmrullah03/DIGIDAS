@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\JadwalAbsen;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -30,10 +31,10 @@ class JadwalAbsenController extends Controller
             });
         }
 
-        return response()->json([
-            'success' => true,
-            'data' => $query->orderBy('jam_mulai')->get(),
-        ]);
+        return ApiResponse::success(
+            $query->orderBy('jam_mulai')->get(),
+            'Data jadwal absen berhasil diambil.'
+        );
     }
 
     public function current(): JsonResponse
@@ -52,10 +53,9 @@ class JadwalAbsenController extends Controller
             ->orderBy('jam_mulai')
             ->first();
 
-        return response()->json([
-            'success' => true,
-            'data' => $jadwal,
+        return ApiResponse::success([
+            'jadwal' => $jadwal,
             'server_time' => $now->toDateTimeString(),
-        ]);
+        ], 'Jadwal absen aktif berhasil diambil.');
     }
 }

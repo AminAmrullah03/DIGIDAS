@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Santri;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -40,10 +41,8 @@ class SantriController extends Controller
             ->paginate((int) $request->input('per_page', 20))
             ->withQueryString();
 
-        return response()->json([
-            'success' => true,
-            'data' => $santri->items(),
-            'meta' => [
+        return ApiResponse::success($santri->items(), 'Data santri berhasil diambil.', 200, [
+            'pagination' => [
                 'current_page' => $santri->currentPage(),
                 'last_page' => $santri->lastPage(),
                 'per_page' => $santri->perPage(),
@@ -60,22 +59,18 @@ class SantriController extends Controller
             'sppTagihan' => fn ($query) => $query->latest('tahun')->latest('bulan')->limit(12),
         ]);
 
-        return response()->json([
-            'success' => true,
-            'data' => $santri,
-        ]);
+        return ApiResponse::success($santri, 'Detail santri berhasil diambil.');
     }
 
     public function kelas(): JsonResponse
     {
-        return response()->json([
-            'success' => true,
-            'data' => Santri::daftarKelas(),
+        return ApiResponse::success([
+            'daftar_kelas' => Santri::daftarKelas(),
             'existing' => Santri::select('kelas')
                 ->whereNotNull('kelas')
                 ->distinct()
                 ->orderBy('kelas')
                 ->pluck('kelas'),
-        ]);
+        ], 'Data kelas berhasil diambil.');
     }
 }

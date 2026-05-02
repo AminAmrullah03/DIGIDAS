@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\ApiResponse;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,10 +23,7 @@ class CheckRole
         // Belum login
         if (! $user) {
             if ($request->expectsJson() || $request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthenticated.',
-                ], 401);
+                return ApiResponse::error('Unauthenticated.', 401);
             }
 
             return redirect()->route('login');
@@ -34,10 +32,7 @@ class CheckRole
         // Cek apakah role user ada di daftar role yang diizinkan
         if (! in_array($user->role, $roles, strict: true)) {
             if ($request->expectsJson() || $request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Akses ditolak. Anda tidak memiliki izin.',
-                ], 403);
+                return ApiResponse::error('Akses ditolak. Anda tidak memiliki izin.', 403);
             }
 
             abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk halaman ini.');

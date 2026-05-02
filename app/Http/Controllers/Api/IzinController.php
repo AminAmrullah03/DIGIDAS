@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Izin;
 use App\Models\Santri;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -19,21 +20,17 @@ class IzinController extends Controller
         $santri = Santri::where('nis', $validated['nis'])->first();
 
         if (! $santri) {
-            return response()->json([
-                'success' => false,
-                'message' => 'NIS tidak ditemukan di database.',
-            ], 404);
+            return ApiResponse::error('NIS tidak ditemukan di database.', 404);
         }
 
         $izinAktif = Izin::where('nis', $santri->nis)
             ->where('status', 'Belum Kembali')
             ->first();
 
-        return response()->json([
-            'success' => true,
+        return ApiResponse::success([
             'santri' => $this->santriPayload($santri),
             'izin_aktif' => $izinAktif ? $this->izinPayload($izinAktif) : null,
-        ]);
+        ], 'Data izin santri berhasil diambil.');
     }
 
     public function store(Request $request): JsonResponse
@@ -46,10 +43,7 @@ class IzinController extends Controller
         $santri = Santri::where('nis', $validated['nis'])->first();
 
         if (! $santri) {
-            return response()->json([
-                'success' => false,
-                'message' => 'NIS tidak ditemukan.',
-            ], 404);
+            return ApiResponse::error('NIS tidak ditemukan.', 404);
         }
 
         $izinAktif = Izin::where('nis', $santri->nis)
@@ -57,11 +51,12 @@ class IzinController extends Controller
             ->first();
 
         if ($izinAktif) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Santri masih dalam izin sebelumnya dan belum kembali.',
-                'izin' => $this->izinPayload($izinAktif),
-            ], 400);
+            return ApiResponse::error(
+                'Santri masih dalam izin sebelumnya dan belum kembali.',
+                409,
+                null,
+                ['izin' => $this->izinPayload($izinAktif)]
+            );
         }
 
         $now = now('Asia/Jakarta');
@@ -73,14 +68,14 @@ class IzinController extends Controller
             'status' => 'Belum Kembali',
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Izin berhasil dicatat.',
-            'data' => [
+        return ApiResponse::success(
+            [
                 'santri' => $this->santriPayload($santri),
                 'izin' => $this->izinPayload($izin),
             ],
-        ], 201);
+            'Izin berhasil dicatat.',
+            201
+        );
     }
 
     public function kembali(Request $request): JsonResponse
@@ -92,10 +87,7 @@ class IzinController extends Controller
         $santri = Santri::where('nis', $validated['nis'])->first();
 
         if (! $santri) {
-            return response()->json([
-                'success' => false,
-                'message' => 'NIS tidak ditemukan.',
-            ], 404);
+            return ApiResponse::error('NIS tidak ditemukan.', 404);
         }
 
         $izinAktif = Izin::where('nis', $santri->nis)
@@ -103,10 +95,7 @@ class IzinController extends Controller
             ->first();
 
         if (! $izinAktif) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Santri tidak memiliki izin aktif.',
-            ], 400);
+            return ApiResponse::error('Santri tidak memiliki izin aktif.', 409);
         }
 
         $izinAktif->update([
@@ -114,14 +103,13 @@ class IzinController extends Controller
             'status' => 'Sudah Kembali',
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Santri telah kembali.',
-            'data' => [
+        return ApiResponse::success(
+            [
                 'santri' => $this->santriPayload($santri),
                 'izin' => $this->izinPayload($izinAktif->fresh()),
             ],
-        ]);
+            'Santri telah kembali.'
+        );
     }
 
     public function rekap(Request $request): JsonResponse
@@ -151,15 +139,13 @@ class IzinController extends Controller
 
         $izin = $query->paginate((int) ($validated['per_page'] ?? 20))->withQueryString();
 
-        return response()->json([
-            'success' => true,
-            'data' => $izin->items(),
+        return ApiResponse::success($izin->items(), 'Data rekap izin berhasil diambil.', 200, [
             'filters' => [
                 'tanggal' => $tanggal,
                 'kelas' => $validated['kelas'] ?? null,
                 'status' => $validated['status'] ?? null,
             ],
-            'meta' => [
+            'pagination' => [
                 'current_page' => $izin->currentPage(),
                 'last_page' => $izin->lastPage(),
                 'per_page' => $izin->perPage(),
@@ -188,11 +174,7 @@ class IzinController extends Controller
 
         $izin->update($data);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Status izin berhasil diperbarui.',
-            'data' => $this->izinPayload($izin->fresh()),
-        ]);
+        return ApiResponse::success($this->izinPayload($izin->fresh()), 'Status izin berhasil diperbarui.');
     }
 
     private function santriPayload(Santri $santri): array

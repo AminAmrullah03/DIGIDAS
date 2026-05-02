@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\JadwalAbsen;
 use App\Models\Santri;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -20,10 +21,7 @@ class AbsensiController extends Controller
         $santri = Santri::where('nis', $validated['nis'])->first();
 
         if (! $santri) {
-            return response()->json([
-                'success' => false,
-                'message' => 'NIS tidak ditemukan di database.',
-            ], 404);
+            return ApiResponse::error('NIS tidak ditemukan di database.', 404);
         }
 
         $now = now('Asia/Jakarta');
@@ -31,15 +29,16 @@ class AbsensiController extends Controller
         $jadwal = $this->activeSchedule($now);
 
         if (! $jadwal) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Bukan waktu absensi.',
-                'data' => [
+            return ApiResponse::error(
+                'Bukan waktu absensi.',
+                409,
+                null,
+                [
                     'santri' => $this->santriPayload($santri),
                     'jadwal' => null,
                     'waktu' => $now->format('H:i:s'),
-                ],
-            ]);
+                ]
+            );
         }
 
         $sudahAbsen = Absensi::where('nis', $santri->nis)
@@ -48,15 +47,16 @@ class AbsensiController extends Controller
             ->exists();
 
         if ($sudahAbsen) {
-            return response()->json([
-                'success' => false,
-                'message' => "Santri ini sudah absen untuk kegiatan {$jadwal->nama_kegiatan} hari ini.",
-                'data' => [
+            return ApiResponse::error(
+                "Santri ini sudah absen untuk kegiatan {$jadwal->nama_kegiatan} hari ini.",
+                409,
+                null,
+                [
                     'santri' => $this->santriPayload($santri),
                     'jadwal' => $this->jadwalPayload($jadwal),
                     'waktu' => $now->format('H:i:s'),
-                ],
-            ]);
+                ]
+            );
         }
 
         $absensi = Absensi::create([
@@ -67,17 +67,17 @@ class AbsensiController extends Controller
             'waktu' => $now,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => "Absensi berhasil dicatat untuk {$jadwal->nama_kegiatan}.",
-            'data' => [
+        return ApiResponse::success(
+            [
                 'id' => $absensi->id,
                 'santri' => $this->santriPayload($santri),
                 'jadwal' => $this->jadwalPayload($jadwal),
                 'status' => $absensi->status,
                 'waktu' => $now->toDateTimeString(),
             ],
-        ], 201);
+            "Absensi berhasil dicatat untuk {$jadwal->nama_kegiatan}.",
+            201
+        );
     }
 
     public function rekap(Request $request): JsonResponse
@@ -116,9 +116,7 @@ class AbsensiController extends Controller
                 });
         }
 
-        return response()->json([
-            'success' => true,
-            'data' => $rekap->values(),
+        return ApiResponse::success($rekap->values(), 'Data rekap absensi berhasil diambil.', 200, [
             'filters' => [
                 'tanggal' => $tanggal,
                 'kelas' => $kelas,
@@ -155,17 +153,16 @@ class AbsensiController extends Controller
             ]);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Status absensi berhasil diperbarui.',
-            'data' => [
+        return ApiResponse::success(
+            [
                 'id' => $absensi->id,
                 'nis' => $absensi->nis,
                 'jadwal_id' => $absensi->jadwal_id,
                 'status' => $absensi->status,
                 'waktu' => $absensi->waktu,
             ],
-        ]);
+            'Status absensi berhasil diperbarui.'
+        );
     }
 
     private function activeSchedule(\DateTimeInterface $now): ?JadwalAbsen

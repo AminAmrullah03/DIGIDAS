@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Santri;
 use App\Models\SppPembayaran;
 use App\Models\SppTagihan;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -74,8 +75,7 @@ class SppController extends Controller
             ];
         });
 
-        return response()->json([
-            'success' => true,
+        return ApiResponse::success([
             'santri' => [
                 'nis' => $santri->nis,
                 'nama' => $santri->nama,
@@ -86,7 +86,7 @@ class SppController extends Controller
             'total_tanggungan' => $totalTanggungan,
             'jumlah_bulan_belum' => count($bulanBelum),
             'bulan_belum' => $bulanBelum,
-        ]);
+        ], 'Data tagihan SPP berhasil diambil.');
     }
 
     public function bayar(Request $request): JsonResponse
@@ -159,11 +159,11 @@ class SppController extends Controller
             }
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Pembayaran berhasil untuk '.count($bulanDibayar).' bulan.',
-            'bulan_dibayar' => $bulanDibayar,
-        ], 201);
+        return ApiResponse::success(
+            ['bulan_dibayar' => $bulanDibayar],
+            'Pembayaran berhasil untuk '.count($bulanDibayar).' bulan.',
+            201
+        );
     }
 
     public function riwayat(Request $request): JsonResponse
@@ -206,14 +206,12 @@ class SppController extends Controller
         $totalCount = (clone $query)->count();
         $pembayaran = $query->paginate((int) ($validated['per_page'] ?? 20))->withQueryString();
 
-        return response()->json([
-            'success' => true,
-            'data' => $pembayaran->items(),
+        return ApiResponse::success($pembayaran->items(), 'Data riwayat SPP berhasil diambil.', 200, [
             'summary' => [
                 'total_nominal' => $totalNominal,
                 'total_count' => $totalCount,
             ],
-            'meta' => [
+            'pagination' => [
                 'current_page' => $pembayaran->currentPage(),
                 'last_page' => $pembayaran->lastPage(),
                 'per_page' => $pembayaran->perPage(),

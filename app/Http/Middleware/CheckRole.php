@@ -21,11 +21,25 @@ class CheckRole
 
         // Belum login
         if (! $user) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthenticated.',
+                ], 401);
+            }
+
             return redirect()->route('login');
         }
 
         // Cek apakah role user ada di daftar role yang diizinkan
         if (! in_array($user->role, $roles, strict: true)) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Akses ditolak. Anda tidak memiliki izin.',
+                ], 403);
+            }
+
             abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk halaman ini.');
         }
 

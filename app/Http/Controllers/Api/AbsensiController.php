@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\JadwalAbsen;
 use App\Models\Santri;
+use App\Models\TahunAjaran;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -59,9 +60,12 @@ class AbsensiController extends Controller
             );
         }
 
+        $tahunAjaran = TahunAjaran::getAktif();
+
         $absensi = Absensi::create([
             'nis' => $santri->nis,
             'jadwal_id' => $jadwal->id,
+            'tahun_ajaran_id' => $tahunAjaran?->id,
             'status' => 'Hadir',
             'kegiatan' => $jadwal->nama_kegiatan,
             'waktu' => $now,
@@ -93,10 +97,11 @@ class AbsensiController extends Controller
         $jadwalId = $validated['jadwal_id'] ?? null;
         $rekap = collect();
 
-        if ($kelas && $jadwalId) {
+        if ($jadwalId) {
             $jadwal = JadwalAbsen::find($jadwalId);
 
-            $rekap = Santri::where('kelas', $kelas)
+            $rekap = Santri::query()
+                ->when($kelas, fn ($query) => $query->where('kelas', $kelas))
                 ->orderBy('nama')
                 ->get()
                 ->map(function (Santri $santri) use ($tanggal, $jadwalId, $jadwal) {
@@ -144,9 +149,12 @@ class AbsensiController extends Controller
         if ($absensi) {
             $absensi->update(['status' => $validated['status']]);
         } else {
+            $tahunAjaran = TahunAjaran::getAktif();
+
             $absensi = Absensi::create([
                 'nis' => $validated['nis'],
                 'jadwal_id' => $validated['jadwal_id'],
+                'tahun_ajaran_id' => $tahunAjaran?->id,
                 'status' => $validated['status'],
                 'kegiatan' => $jadwal->nama_kegiatan,
                 'waktu' => $validated['tanggal'].' 00:00:00',

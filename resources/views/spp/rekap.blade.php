@@ -89,7 +89,7 @@ td.left{text-align:left;}
         {{-- Banner --}}
         <div class="page-banner">
             <h1>📊 Rekap Pembayaran SPP</h1>
-            <p>Status pembayaran SPP seluruh santri — Tahun {{ $tahun }} H</p>
+            <p>Status pembayaran SPP seluruh santri — {{ $tahunAjaran?->nama ?? 'Semua' }} {{ $tahunAjaran?->tahun_hijriah ? '('.$tahunAjaran->tahun_hijriah.'H)' : '' }}</p>
             <div class="banner-actions">
                 <a href="{{ route('spp.index') }}" class="btn-white">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
@@ -107,7 +107,7 @@ td.left{text-align:left;}
             <div class="stat-card"><p class="stat-label">Total Santri</p><p class="stat-value" style="color:#2563eb;">{{ $totalSantri }}</p></div>
             <div class="stat-card"><p class="stat-label">Lunas Semua</p><p class="stat-value" style="color:#059669;">{{ $totalLunas }}</p></div>
             <div class="stat-card"><p class="stat-label">Ada Tunggakan</p><p class="stat-value" style="color:#dc2626;">{{ $totalBelum }}</p></div>
-            <div class="stat-card"><p class="stat-label">SPP/Bulan</p><p class="stat-value" style="font-size:0.95rem;color:#475569;">Rp 50.000</p></div>
+            <div class="stat-card"><p class="stat-label">SPP/Bulan</p><p class="stat-value" style="font-size:0.95rem;color:#475569;">Rp {{ number_format($tahunAjaran?->nominal_spp ?? 0, 0, ',', '.') }}</p></div>
         </div>
 
         {{-- Filter --}}
@@ -115,11 +115,11 @@ td.left{text-align:left;}
             <form method="GET">
                 <div class="filter-row">
                     <div class="form-group">
-                        <label class="form-label">Tahun Hijriah</label>
-                        <select name="tahun" class="form-ctrl">
-                            @for($y=1448;$y>=1444;$y--)
-                                <option value="{{ $y }}" {{ $tahun==$y?'selected':'' }}>{{ $y }} H</option>
-                            @endfor
+                        <label class="form-label">Tahun Ajaran</label>
+                        <select name="tahun_ajaran_id" class="form-ctrl">
+                            @foreach($semua as $ta)
+                                <option value="{{ $ta->id }}" {{ $tahunAjaran?->id == $ta->id ? 'selected' : '' }}>{{ $ta->nama }} {{ $ta->isAktif() ? '(Aktif)' : '' }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="form-group">
@@ -164,16 +164,16 @@ td.left{text-align:left;}
                         <td class="left" style="color:#94a3b8;font-size:0.72rem;">{{ $index+1 }}</td>
                         <td class="left" style="font-family:monospace;font-weight:600;color:#475569;border-right:1px solid #f1f5f9;" class="dark:border-slate-700 dark:text-slate-300">{{ $data['santri']->nis }}</td>
                         <td class="left" style="font-weight:600;color:#1e293b;border-right:1px solid #f1f5f9;" class="dark:border-slate-700 dark:text-white">{{ $data['santri']->nama }}</td>
-                        <td style="font-size:0.78rem;color:#64748b;">{{ $data['santri']->kelas }}</td>
+                        <td style="font-size:0.78rem;color:#64748b;">{{ $data['kelas'] ?? $data['santri']->kelas }}</td>
                         @for($b=1;$b<=12;$b++)
                             @php
                                 $t      = $data['tagihan'][$b] ?? null;
                                 $status = $t ? $t->status : 'belum';
-                                $nom    = $t ? $t->nominal : 50000;
+                                $nom    = $t ? $t->nominal : ($tahunAjaran?->nominal_spp ?? 0);
                                 $totalTagihan += $nom;
                                 if($status==='lunas') $totalBayar += $nom;
                                 elseif($status==='sebagian'){
-                                    $bayar = \App\Models\SppPembayaran::where('nis',$data['santri']->nis)->where('bulan',$b)->where('tahun',$tahun)->sum('nominal_bayar');
+                                    $bayar = \App\Models\SppPembayaran::where('nis',$data['santri']->nis)->where('bulan',$b)->where('tahun_ajaran_id',$tahunAjaran?->id)->sum('nominal_bayar');
                                     $totalBayar += $bayar;
                                 }
                             @endphp

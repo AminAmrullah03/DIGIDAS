@@ -262,15 +262,13 @@ tbody tr:last-child td { border-bottom:none; }
                     </tbody>
                 </table>
             </div>
-            @if($rekap->isEmpty())
-            <div class="empty-state">
-                <div class="empty-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#94a3b8" style="width:24px;height:24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0112 18.375"/></svg>
+            <div class="empty-state" id="empty-state" style="{{ $rekap->isEmpty() ? '' : 'display:none;' }}">
+                <div class="empty-icon" id="empty-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#94a3b8" style="width:24px;height:24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
                 </div>
-                <p style="font-weight:700;font-size:0.95rem;color:#475569;margin:0 0 4px;">Belum ada data absensi</p>
-                <p style="font-size:0.8rem;color:#94a3b8;margin:0;">Pilih tanggal dan kegiatan untuk menampilkan rekap</p>
+                <p style="font-weight:700;font-size:0.95rem;color:#475569;margin:0 0 4px;" id="empty-title">Pilih Filter Terlebih Dahulu</p>
+                <p style="font-size:0.8rem;color:#94a3b8;margin:0;" id="empty-desc">Pilih kelas dan kegiatan, lalu klik <strong>Tampilkan</strong> untuk melihat rekap absensi</p>
             </div>
-            @endif
         </div>
 
     </div>
@@ -293,10 +291,30 @@ async function loadRekap() {
 
     try {
         const params = new URLSearchParams({ tanggal, kelas, kegiatan });
-        const res    = await fetch(`/rekap-data?${params}`, { headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'} });
+        const res    = await fetch(`/rekap-data?${params}`, { headers:{'Accept':'text/html','X-Requested-With':'XMLHttpRequest'} });
         const html   = await res.text();
 
         document.getElementById('rekap-tbody').innerHTML = html;
+
+        const emptyState = document.getElementById('empty-state');
+        const emptyTitle = document.getElementById('empty-title');
+        const emptyDesc  = document.getElementById('empty-desc');
+        const emptyIcon  = document.getElementById('empty-icon');
+        if (html.trim() === '') {
+            if (kegiatan) {
+                emptyTitle.textContent = 'Belum ada data absensi';
+                emptyDesc.innerHTML = 'Tidak ada catatan absensi untuk tanggal dan kegiatan yang dipilih';
+                emptyIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#94a3b8" style="width:24px;height:24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0112 18.375"/></svg>';
+            } else {
+                emptyTitle.textContent = 'Pilih Filter Terlebih Dahulu';
+                emptyDesc.innerHTML = 'Pilih kelas dan kegiatan, lalu klik <strong>Tampilkan</strong> untuk melihat rekap absensi';
+                emptyIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#94a3b8" style="width:24px;height:24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>';
+            }
+            if (emptyState) emptyState.style.display = 'block';
+        } else {
+            if (emptyState) emptyState.style.display = 'none';
+        }
+
         updateStats();
         applyBadgeStyles();
         bindStatusSelects();
@@ -353,7 +371,7 @@ function bindStatusSelects() {
                 const res = await fetch('/rekap/update-status', {
                     method:'POST',
                     headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'Accept':'application/json'},
-                    body: JSON.stringify({nis, status, tanggal, kegiatan_id: kegiatan})
+                    body: JSON.stringify({nis, status, tanggal, jadwal_id: kegiatan})
                 });
                 const data = await res.json();
                 if(data.success) {
@@ -378,7 +396,10 @@ document.getElementById('btn-reset').addEventListener('click', () => {
     document.getElementById('kegiatan').value = '';
     loadRekap();
 });
-document.getElementById('tanggal').addEventListener('change', loadRekap);
+document.getElementById('tanggal').addEventListener('change', () => {
+    const kegiatan = document.getElementById('kegiatan').value;
+    if (kegiatan) loadRekap();
+});
 
 // Initial
 applyBadgeStyles();

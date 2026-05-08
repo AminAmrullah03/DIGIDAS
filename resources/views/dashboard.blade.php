@@ -91,6 +91,7 @@
     .card-lime    { --accent: #65a30d; --accent-border: rgba(101,163,13,0.3); --accent-light: #65a30d; }
     .card-violet  { --accent: #8b5cf6; --accent-border: rgba(139,92,246,0.3); --accent-light: #7c3aed; }
     .card-sky     { --accent: #0ea5e9; --accent-border: rgba(14,165,233,0.3); --accent-light: #0284c7; }
+    .card-amber   { --accent: #d97706; --accent-border: rgba(217,119,6,0.3); --accent-light: #b45309; }
 
     /* Icon wrap */
     .card-icon-wrap {
@@ -106,6 +107,7 @@
     .card-lime    .card-icon-wrap { background: #f7fee7; }
     .card-violet  .card-icon-wrap { background: #f5f3ff; }
     .card-sky     .card-icon-wrap { background: #f0f9ff; }
+    .card-amber   .card-icon-wrap { background: #fffbeb; }
     .dash-card:hover .card-icon-wrap { transform: scale(1.08); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     .card-icon-wrap svg { color: var(--accent); }
 
@@ -358,6 +360,19 @@
                 <div style="flex:1;min-width:0;">
                     <p class="card-title">Kelola Kelas</p>
                     <p class="card-desc">Atur penempatan kelas santri</p>
+                </div>
+                <svg class="card-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </a>
+
+            <a href="{{ route('admin.tahun-ajaran.index') }}" class="dash-card card-amber">
+                <div class="card-icon-wrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:26px;height:26px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 8.25h18M4.5 5.25h15A1.5 1.5 0 0121 6.75v12A1.5 1.5 0 0119.5 20.25h-15A1.5 1.5 0 013 18.75v-12A1.5 1.5 0 014.5 5.25z"/>
+                    </svg>
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <p class="card-title">Tahun Ajaran</p>
+                    <p class="card-desc">Kelola periode akademik dan nominal SPP</p>
                 </div>
                 <svg class="card-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
             </a>

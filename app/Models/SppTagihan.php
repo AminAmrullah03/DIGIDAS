@@ -10,8 +10,8 @@ class SppTagihan extends Model
 
     protected $fillable = [
         'nis',
+        'tahun_ajaran_id',
         'bulan',
-        'tahun',
         'nominal',
         'status',
     ];
@@ -20,25 +20,34 @@ class SppTagihan extends Model
         'nominal' => 'decimal:2',
     ];
 
+    // ─── Relations ───────────────────────────────────────────────────────────
+
     public function santri()
     {
         return $this->belongsTo(Santri::class, 'nis', 'nis');
+    }
+
+    public function tahunAjaran()
+    {
+        return $this->belongsTo(TahunAjaran::class);
     }
 
     public function pembayaran()
     {
         return $this->hasMany(SppPembayaran::class, 'nis', 'nis')
             ->where('bulan', $this->bulan)
-            ->where('tahun', $this->tahun);
+            ->where('tahun_ajaran_id', $this->tahun_ajaran_id);
     }
 
-    public function getNamaBulanAttribute()
+    // ─── Accessors ───────────────────────────────────────────────────────────
+
+    public function getNamaBulanAttribute(): string
     {
         $bulan = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret',
-            4 => 'April', 5 => 'Mei', 6 => 'Juni',
-            7 => 'Juli', 8 => 'Agustus', 9 => 'September',
-            10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+            1 => 'Muharram', 2 => 'Safar', 3 => 'Rabiul Awal',
+            4 => 'Rabiul Akhir', 5 => 'Jumadil Awal', 6 => 'Jumadil Akhir',
+            7 => 'Rajab', 8 => 'Syaban', 9 => 'Ramadhan',
+            10 => 'Syawal', 11 => 'Dzulqaidah', 12 => 'Dzulhijjah',
         ];
         return $bulan[$this->bulan] ?? '-';
     }

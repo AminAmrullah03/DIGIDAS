@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Santri;
+use App\Models\SantriKelas;
+use App\Models\TahunAjaran;
 use App\Models\RiwayatKelas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -54,7 +56,8 @@ class SantriController extends Controller
             'keterangan'    => 'nullable|string',
         ]);
 
-        Santri::create($data);
+        $santri = Santri::create($data);
+        $this->syncKelasTahunAktif($santri->nis, $santri->kelas);
 
         return redirect()->route('admin.santri.index')
             ->with('success', 'Santri ' . $data['nama'] . ' berhasil ditambahkan.');
@@ -96,6 +99,7 @@ class SantriController extends Controller
         }
 
         $santri->update($data);
+        $this->syncKelasTahunAktif($santri->nis, $santri->kelas);
 
         return redirect()->route('admin.santri.index')
             ->with('success', 'Data santri ' . $santri->nama . ' berhasil diperbarui.');
@@ -132,10 +136,13 @@ class SantriController extends Controller
             if (!$nis || !$nama) continue;
 
             try {
-                Santri::updateOrCreate(
+                $santri = Santri::updateOrCreate(
                     ['nis' => $nis],
                     ['nama' => $nama, 'kelas' => $kelas ?: null]
                 );
+                if ($kelas) {
+                    $this->syncKelasTahunAktif($santri->nis, $kelas);
+                }
                 $count++;
             } catch (\Exception $e) {
                 $errors[] = "Baris " . ($i + 1) . ": {$e->getMessage()}";
@@ -152,49 +159,108 @@ class SantriController extends Controller
 
     public function kelolaKelas(Request $request)
     {
-        $kelasFilter = $request->get('kelas_asal');
-        $daftarKelas = Santri::daftarKelas();
+        $daftarKelas   = Santri::daftarKelas();
+        $semuaTahun    = TahunAjaran::orderByDesc('id')->get();
+        $tahunAjaranId = $request->get('tahun_ajaran_id');
+        $kelasFilter   = $request->get('kelas_asal');
+
+        // Default ke tahun ajaran aktif
+        $tahunAjaran = $tahunAjaranId
+            ? $semuaTahun->firstWhere('id', $tahunAjaranId)
+            : $semuaTahun->firstWhere('status', 'aktif') ?? $semuaTahun->first();
 
         $santri = null;
-        if ($kelasFilter) {
-            $santri = Santri::where('status', 'aktif')
+        if ($tahunAjaran && $kelasFilter) {
+            // Ambil santri dari santri_kelas di tahun ajaran tersebut
+            $santri = SantriKelas::with('santri')
+                ->where('tahun_ajaran_id', $tahunAjaran->id)
                 ->where('kelas', $kelasFilter)
-                ->orderBy('nama')
-                ->get();
+                ->get()
+                ->map->santri
+                ->filter()
+                ->sortBy('nama')
+                ->values();
         }
 
-        return view('admin.santri.kelola-kelas', compact('kelasFilter', 'daftarKelas', 'santri'));
+        return view('admin.santri.kelola-kelas', compact(
+            'kelasFilter', 'daftarKelas', 'santri', 'semuaTahun', 'tahunAjaran'
+        ));
     }
 
     public function updateKelolaKelas(Request $request)
     {
         $request->validate([
-            'kelas_updates'   => 'required|array',
-            'kelas_updates.*' => 'required|string|max:50',
+            'tahun_ajaran_id'  => 'required|integer|exists:tahun_ajaran,id',
+            'kelas_updates'    => 'required|array',
+            'kelas_updates.*'  => 'required|string|max:50',
         ]);
 
-        $updated = 0;
-        foreach ($request->kelas_updates as $nis => $kelasBaruData) {
-            $santri = Santri::find($nis);
-            if (!$santri) continue;
+        $tahunAjaran = TahunAjaran::findOrFail($request->tahun_ajaran_id);
+        $isAktif     = $tahunAjaran->isAktif();
+        $updated     = 0;
 
-            $kelasBaru = trim($kelasBaruData);
-            if ($santri->kelas === $kelasBaru) continue;
+        foreach ($request->kelas_updates as $nis => $kelasBaru) {
+            $kelasBaru = trim($kelasBaru);
+            $santri    = Santri::find($nis);
+            if (! $santri) continue;
 
-            RiwayatKelas::create([
-                'nis'         => $santri->nis,
-                'kelas_lama'  => $santri->kelas,
-                'kelas_baru'  => $kelasBaru,
-                'diubah_oleh' => auth()->user()->name ?? 'Admin',
-                'catatan'     => 'Kelola kelas massal',
+            // Update atau buat record santri_kelas
+            $santriKelas = SantriKelas::firstOrNew([
+                'nis'             => $santri->nis,
+                'tahun_ajaran_id' => $tahunAjaran->id,
             ]);
 
-            $santri->update(['kelas' => $kelasBaru]);
+            if ($santriKelas->kelas === $kelasBaru) continue;
+
+            $santriKelas->kelas       = $kelasBaru;
+            $santriKelas->diubah_oleh = auth()->user()->name ?? 'Admin';
+            $santriKelas->save();
+
+            // Jika ini tahun ajaran aktif, sync shortcut santri.kelas juga
+            if ($isAktif) {
+                $santri->update(['kelas' => $kelasBaru]);
+            }
+
             $updated++;
         }
 
-        return redirect()->route('admin.santri.kelola-kelas')
+        return redirect()->route('admin.santri.kelola-kelas', [
+                'tahun_ajaran_id' => $tahunAjaran->id,
+            ])
             ->with('success', "{$updated} data kelas santri berhasil diperbarui.");
+    }
+
+    /**
+     * Kenaikan kelas massal ke tahun ajaran baru.
+     */
+    public function kenaikanKelas(Request $request)
+    {
+        $request->validate([
+            'tahun_ajaran_baru_id'  => 'required|integer|exists:tahun_ajaran,id',
+            'kenaikan'              => 'required|array',
+            'kenaikan.*.nis'        => 'required|string|exists:santri,nis',
+            'kenaikan.*.kelas_baru' => 'required|string|max:50',
+        ]);
+
+        $tahunBaru = TahunAjaran::findOrFail($request->tahun_ajaran_baru_id);
+        $inserted  = 0;
+
+        foreach ($request->kenaikan as $row) {
+            SantriKelas::updateOrCreate(
+                ['nis' => $row['nis'], 'tahun_ajaran_id' => $tahunBaru->id],
+                ['kelas' => $row['kelas_baru'], 'diubah_oleh' => auth()->user()->name ?? 'Admin']
+            );
+
+            // Jika tahun baru adalah tahun aktif, sync shortcut
+            if ($tahunBaru->isAktif()) {
+                Santri::where('nis', $row['nis'])->update(['kelas' => $row['kelas_baru']]);
+            }
+
+            $inserted++;
+        }
+
+        return redirect()->route('admin.santri.kelola-kelas', ['tahun_ajaran_id' => $tahunBaru->id])
+            ->with('success', "{$inserted} santri berhasil dinaikkan kelasnya ke {$tahunBaru->nama}.");
     }
 
     /**
@@ -240,5 +306,23 @@ class SantriController extends Controller
 
         return redirect()->route('admin.santri.index')
             ->with('success', "{$count} santri berhasil diperbarui ({$changedFields}).");
+    }
+
+    private function syncKelasTahunAktif(string $nis, ?string $kelas): void
+    {
+        if (! $kelas) {
+            return;
+        }
+
+        $tahunAjaran = TahunAjaran::getAktif();
+
+        if (! $tahunAjaran) {
+            return;
+        }
+
+        SantriKelas::updateOrCreate(
+            ['nis' => $nis, 'tahun_ajaran_id' => $tahunAjaran->id],
+            ['kelas' => $kelas, 'diubah_oleh' => auth()->user()->name ?? 'Admin']
+        );
     }
 }

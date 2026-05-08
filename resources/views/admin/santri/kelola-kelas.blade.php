@@ -136,6 +136,16 @@
                     <p class="step-label"><span class="step-num">1</span> Pilih Kelas Asal</p>
                     <form method="GET" class="filter-row">
                         <div class="form-group" style="flex:1;">
+                            <label class="form-label">Tahun Ajaran</label>
+                            <select name="tahun_ajaran_id" class="form-ctrl" onchange="this.form.submit()">
+                                @foreach($semuaTahun as $ta)
+                                    <option value="{{ $ta->id }}" {{ $tahunAjaran?->id == $ta->id ? 'selected' : '' }}>
+                                        {{ $ta->nama }} {{ $ta->isAktif() ? '(Aktif)' : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex:1;">
                             <label class="form-label">Kelas yang ingin dikelola</label>
                             <select name="kelas_asal" id="kelas_asal_select" class="form-ctrl" onchange="this.form.submit()">
                                 <option value="">-- Pilih kelas --</option>
@@ -224,13 +234,14 @@
 
                     <form id="form-pindah" action="{{ route('admin.santri.kelola-kelas.update') }}" method="POST">
                         @csrf
+                        <input type="hidden" name="tahun_ajaran_id" value="{{ $tahunAjaran?->id }}">
                         <div id="nis-inputs"></div>
                         <input type="hidden" name="kelas_baru" id="input-kelas-baru">
 
                         <div class="form-group" style="margin-bottom:12px;">
                             <label class="form-label">Catatan Perubahan Kelas <span style="color:#dc2626;">*</span></label>
                             <input type="text" name="catatan_kelas" id="input-catatan" required class="form-ctrl"
-                                placeholder="Misal: Naik kelas tahun ajaran 1446-1447 H"
+                                placeholder="Misal: Naik kelas tahun ajaran {{ $tahunAjaran?->nama ?? '' }}"
                                 value="{{ old('catatan_kelas') }}">
                             @error('catatan_kelas')<span class="form-error">{{ $message }}</span>@enderror
                         </div>

@@ -56,7 +56,7 @@ class SantriController extends Controller
         $santri->load([
             'absensi' => fn ($query) => $query->latest('waktu')->limit(10),
             'izin' => fn ($query) => $query->latest('waktu_keluar')->limit(10),
-            'sppTagihan' => fn ($query) => $query->latest('tahun')->latest('bulan')->limit(12),
+            'sppTagihan' => fn ($query) => $query->with('tahunAjaran')->orderByDesc('tahun_ajaran_id')->orderByDesc('bulan')->limit(12),
         ]);
 
         return ApiResponse::success($santri, 'Detail santri berhasil diambil.');

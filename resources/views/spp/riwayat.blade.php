@@ -165,11 +165,11 @@ tbody tr:last-child td{border-bottom:none;}
                         <input type="text" name="nis" value="{{ $nis }}" placeholder="Cari NIS..." class="form-ctrl" style="width:140px;">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Tahun Hijriah</label>
-                        <select name="tahun" class="form-ctrl">
-                            @for($y=1448;$y>=1444;$y--)
-                                <option value="{{ $y }}" {{ $tahun==$y ? 'selected':'' }}>{{ $y }} H</option>
-                            @endfor
+                        <label class="form-label">Tahun Ajaran</label>
+                        <select name="tahun_ajaran_id" class="form-ctrl">
+                            @foreach($semua as $ta)
+                                <option value="{{ $ta->id }}" {{ $tahunAjaran?->id == $ta->id ? 'selected' : '' }}>{{ $ta->nama }} {{ $ta->isAktif() ? '(Aktif)' : '' }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <button type="submit" class="btn-filter">
@@ -209,7 +209,7 @@ tbody tr:last-child td{border-bottom:none;}
                                 <div style="font-weight:600;color:#1e293b;" class="dark:text-white">{{ $item->santri->nama ?? '-' }}</div>
                                 <div style="font-size:0.75rem;color:#94a3b8;">{{ $item->santri->kelas ?? '' }}</div>
                             </td>
-                            <td>{{ $bulanHijriah[$item->bulan] ?? '-' }} {{ $item->tahun }}H</td>
+                            <td>{{ $bulanHijriah[$item->bulan] ?? '-' }} {{ $item->tahunAjaran->tahun_hijriah ?? $item->tahun_ajaran_id }}H</td>
                             <td class="nominal-cell">Rp {{ number_format($item->nominal_bayar, 0, ',', '.') }}</td>
                             <td>
                                 @if($item->metode === 'cash')

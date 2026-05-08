@@ -4,21 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class SppPembayaran extends Model
+class SantriKelas extends Model
 {
-    protected $table = 'spp_pembayaran';
+    protected $table = 'santri_kelas';
 
     protected $fillable = [
         'nis',
         'tahun_ajaran_id',
-        'bulan',
-        'nominal_bayar',
-        'metode',
-        'keterangan',
-    ];
-
-    protected $casts = [
-        'nominal_bayar' => 'decimal:2',
+        'kelas',
+        'diubah_oleh',
     ];
 
     // ─── Relations ───────────────────────────────────────────────────────────

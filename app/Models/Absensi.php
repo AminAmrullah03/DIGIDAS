@@ -10,7 +10,7 @@ class Absensi extends Model
     use HasFactory;
 
     protected $table = 'absensi';
-    protected $fillable = ['nis', 'jadwal_id', 'waktu', 'status', 'kegiatan'];
+    protected $fillable = ['nis', 'jadwal_id', 'tahun_ajaran_id', 'waktu', 'status', 'kegiatan'];
 
     public function santri()
     {
@@ -20,5 +20,10 @@ class Absensi extends Model
     public function jadwal()
     {
         return $this->belongsTo(JadwalAbsen::class, 'jadwal_id');
+    }
+
+    public function tahunAjaran()
+    {
+        return $this->belongsTo(TahunAjaran::class);
     }
 }

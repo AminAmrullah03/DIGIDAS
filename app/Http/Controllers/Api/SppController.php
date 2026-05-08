@@ -4,16 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Santri;
+use App\Models\SantriKelas;
 use App\Models\SppPembayaran;
 use App\Models\SppTagihan;
+use App\Models\TahunAjaran;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class SppController extends Controller
 {
-    private const NOMINAL_SPP = 50000;
-
     private const BULAN_HIJRIAH = [
         1 => 'Muharram',
         2 => 'Safar',
@@ -33,16 +33,21 @@ class SppController extends Controller
     {
         $validated = $request->validate([
             'nis' => ['required', 'string', 'exists:santri,nis'],
+            'tahun_ajaran_id' => ['nullable', 'integer', 'exists:tahun_ajaran,id'],
             'tahun' => ['nullable', 'integer', 'min:1300', 'max:1700'],
         ]);
 
         $santri = Santri::where('nis', $validated['nis'])->firstOrFail();
-        $tahun = $validated['tahun'] ?? 1446;
+        $tahunAjaran = $this->resolveTahunAjaran($validated);
 
-        $this->generateTagihanTahunan($santri->nis, $tahun);
+        if (! $tahunAjaran) {
+            return ApiResponse::error('Tidak ada tahun ajaran aktif.', 422);
+        }
+
+        $this->generateTagihanTahunan($santri->nis, $tahunAjaran);
 
         $tagihan = SppTagihan::where('nis', $santri->nis)
-            ->where('tahun', $tahun)
+            ->where('tahun_ajaran_id', $tahunAjaran->id)
             ->orderBy('bulan')
             ->get();
 
@@ -52,7 +57,7 @@ class SppController extends Controller
         $tagihanFormatted = $tagihan->map(function (SppTagihan $item) use (&$totalTanggungan, &$bulanBelum) {
             $totalBayar = (int) SppPembayaran::where('nis', $item->nis)
                 ->where('bulan', $item->bulan)
-                ->where('tahun', $item->tahun)
+                ->where('tahun_ajaran_id', $item->tahun_ajaran_id)
                 ->sum('nominal_bayar');
 
             $nominal = (int) $item->nominal;
@@ -67,7 +72,6 @@ class SppController extends Controller
                 'id' => $item->id,
                 'bulan' => $item->bulan,
                 'nama_bulan' => self::BULAN_HIJRIAH[$item->bulan],
-                'tahun' => (int) $item->tahun,
                 'nominal' => $nominal,
                 'total_bayar' => $totalBayar,
                 'sisa' => $sisa,
@@ -79,10 +83,11 @@ class SppController extends Controller
             'santri' => [
                 'nis' => $santri->nis,
                 'nama' => $santri->nama,
-                'kelas' => $santri->kelas,
+                'kelas' => $this->kelasSantriUntukTahun($santri, $tahunAjaran),
             ],
             'tagihan' => $tagihanFormatted,
-            'tahun' => $tahun,
+            'tahun_ajaran' => $this->tahunAjaranPayload($tahunAjaran),
+            'tahun_ajaran_id' => $tahunAjaran->id,
             'total_tanggungan' => $totalTanggungan,
             'jumlah_bulan_belum' => count($bulanBelum),
             'bulan_belum' => $bulanBelum,
@@ -93,27 +98,37 @@ class SppController extends Controller
     {
         $validated = $request->validate([
             'nis' => ['required', 'string', 'exists:santri,nis'],
-            'tahun' => ['required', 'integer', 'min:1300', 'max:1700'],
+            'tahun_ajaran_id' => ['nullable', 'integer', 'exists:tahun_ajaran,id'],
+            'tahun' => ['nullable', 'integer', 'min:1300', 'max:1700'],
             'nominal_bayar' => ['required', 'numeric', 'min:1'],
             'metode' => ['required', 'in:cash,transfer'],
             'keterangan' => ['nullable', 'string', 'max:500'],
         ]);
 
+        $currentTA = $this->resolveTahunAjaran($validated);
+
+        if (! $currentTA) {
+            return ApiResponse::error('Tidak ada tahun ajaran aktif.', 422);
+        }
+
         $sisaNominal = (int) $validated['nominal_bayar'];
-        $tahun = (int) $validated['tahun'];
         $bulanDibayar = [];
 
         while ($sisaNominal > 0) {
-            $this->generateTagihanTahunan($validated['nis'], $tahun);
+            $this->generateTagihanTahunan($validated['nis'], $currentTA);
 
             $tagihanBelumLunas = SppTagihan::where('nis', $validated['nis'])
-                ->where('tahun', $tahun)
+                ->where('tahun_ajaran_id', $currentTA->id)
                 ->where('status', '!=', 'lunas')
                 ->orderBy('bulan')
                 ->get();
 
             if ($tagihanBelumLunas->isEmpty()) {
-                $tahun++;
+                $next = TahunAjaran::where('tahun_hijriah', $currentTA->tahun_hijriah + 1)->first();
+                if (! $next) {
+                    break;
+                }
+                $currentTA = $next;
                 continue;
             }
 
@@ -124,7 +139,7 @@ class SppController extends Controller
 
                 $totalBayar = (int) SppPembayaran::where('nis', $validated['nis'])
                     ->where('bulan', $tagihan->bulan)
-                    ->where('tahun', $tagihan->tahun)
+                    ->where('tahun_ajaran_id', $tagihan->tahun_ajaran_id)
                     ->sum('nominal_bayar');
 
                 $sisaTagihan = (int) $tagihan->nominal - $totalBayar;
@@ -138,24 +153,16 @@ class SppController extends Controller
                 SppPembayaran::create([
                     'nis' => $validated['nis'],
                     'bulan' => $tagihan->bulan,
-                    'tahun' => $tagihan->tahun,
+                    'tahun_ajaran_id' => $tagihan->tahun_ajaran_id,
                     'nominal_bayar' => $bayarSekarang,
                     'metode' => $validated['metode'],
                     'keterangan' => $validated['keterangan'] ?? null,
                 ]);
 
-                $this->updateStatusTagihan($validated['nis'], $tagihan->bulan, $tagihan->tahun);
+                $this->updateStatusTagihan($validated['nis'], $tagihan->bulan, $tagihan->tahun_ajaran_id);
 
-                $bulanDibayar[] = self::BULAN_HIJRIAH[$tagihan->bulan].' '.$tagihan->tahun.'H';
+                $bulanDibayar[] = self::BULAN_HIJRIAH[$tagihan->bulan].' '.$currentTA->tahun_hijriah.'H';
                 $sisaNominal -= $bayarSekarang;
-            }
-
-            if ($sisaNominal > 0) {
-                $tahun++;
-            }
-
-            if ($tahun > ((int) $validated['tahun']) + 3) {
-                break;
             }
         }
 
@@ -170,6 +177,7 @@ class SppController extends Controller
     {
         $validated = $request->validate([
             'nis' => ['nullable', 'string', 'exists:santri,nis'],
+            'tahun_ajaran_id' => ['nullable', 'integer', 'exists:tahun_ajaran,id'],
             'tahun' => ['nullable', 'integer', 'min:1300', 'max:1700'],
             'period' => ['nullable', 'in:today,week,custom,all'],
             'dari' => ['nullable', 'date'],
@@ -177,11 +185,11 @@ class SppController extends Controller
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ]);
 
-        $tahun = $validated['tahun'] ?? 1446;
+        $tahunAjaran = $this->resolveTahunAjaran($validated);
         $period = $validated['period'] ?? 'all';
 
-        $query = SppPembayaran::with('santri')
-            ->where('tahun', $tahun)
+        $query = SppPembayaran::with(['santri', 'tahunAjaran'])
+            ->when($tahunAjaran, fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaran->id))
             ->orderByDesc('created_at');
 
         if (! empty($validated['nis'])) {
@@ -207,6 +215,9 @@ class SppController extends Controller
         $pembayaran = $query->paginate((int) ($validated['per_page'] ?? 20))->withQueryString();
 
         return ApiResponse::success($pembayaran->items(), 'Data riwayat SPP berhasil diambil.', 200, [
+            'filters' => [
+                'tahun_ajaran' => $tahunAjaran ? $this->tahunAjaranPayload($tahunAjaran) : null,
+            ],
             'summary' => [
                 'total_nominal' => $totalNominal,
                 'total_count' => $totalCount,
@@ -220,21 +231,34 @@ class SppController extends Controller
         ]);
     }
 
-    private function generateTagihanTahunan(string $nis, int $tahun): void
+    private function resolveTahunAjaran(array $input): ?TahunAjaran
+    {
+        if (! empty($input['tahun_ajaran_id'])) {
+            return TahunAjaran::find($input['tahun_ajaran_id']);
+        }
+
+        if (! empty($input['tahun'])) {
+            return TahunAjaran::where('tahun_hijriah', $input['tahun'])->first();
+        }
+
+        return TahunAjaran::getAktif() ?? TahunAjaran::orderByDesc('id')->first();
+    }
+
+    private function generateTagihanTahunan(string $nis, TahunAjaran $tahunAjaran): void
     {
         for ($bulan = 1; $bulan <= 12; $bulan++) {
             SppTagihan::firstOrCreate(
-                ['nis' => $nis, 'bulan' => $bulan, 'tahun' => $tahun],
-                ['nominal' => self::NOMINAL_SPP, 'status' => 'belum']
+                ['nis' => $nis, 'bulan' => $bulan, 'tahun_ajaran_id' => $tahunAjaran->id],
+                ['nominal' => $tahunAjaran->nominal_spp, 'status' => 'belum']
             );
         }
     }
 
-    private function updateStatusTagihan(string $nis, int $bulan, int $tahun): void
+    private function updateStatusTagihan(string $nis, int $bulan, int $tahunAjaranId): void
     {
         $tagihan = SppTagihan::where('nis', $nis)
             ->where('bulan', $bulan)
-            ->where('tahun', $tahun)
+            ->where('tahun_ajaran_id', $tahunAjaranId)
             ->first();
 
         if (! $tagihan) {
@@ -243,17 +267,34 @@ class SppController extends Controller
 
         $totalBayar = (int) SppPembayaran::where('nis', $nis)
             ->where('bulan', $bulan)
-            ->where('tahun', $tahun)
+            ->where('tahun_ajaran_id', $tahunAjaranId)
             ->sum('nominal_bayar');
 
-        if ($totalBayar >= (int) $tagihan->nominal) {
-            $tagihan->status = 'lunas';
-        } elseif ($totalBayar > 0) {
-            $tagihan->status = 'sebagian';
-        } else {
-            $tagihan->status = 'belum';
-        }
+        $tagihan->status = match (true) {
+            $totalBayar >= (int) $tagihan->nominal => 'lunas',
+            $totalBayar > 0 => 'sebagian',
+            default => 'belum',
+        };
 
         $tagihan->save();
+    }
+
+    private function kelasSantriUntukTahun(Santri $santri, TahunAjaran $tahunAjaran): ?string
+    {
+        return SantriKelas::where('nis', $santri->nis)
+            ->where('tahun_ajaran_id', $tahunAjaran->id)
+            ->value('kelas') ?? $santri->kelas;
+    }
+
+    private function tahunAjaranPayload(TahunAjaran $tahunAjaran): array
+    {
+        return [
+            'id' => $tahunAjaran->id,
+            'nama' => $tahunAjaran->nama,
+            'tahun_hijriah' => $tahunAjaran->tahun_hijriah,
+            'tahun_masehi' => $tahunAjaran->tahun_masehi,
+            'nominal_spp' => (int) $tahunAjaran->nominal_spp,
+            'status' => $tahunAjaran->status,
+        ];
     }
 }

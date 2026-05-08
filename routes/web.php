@@ -6,6 +6,7 @@ use App\Http\Controllers\SppController;
 use App\Http\Controllers\IzinController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SantriController;
+use App\Http\Controllers\Admin\TahunAjaranController;
 use App\Http\Controllers\Admin\JadwalAbsenController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Santri;
@@ -67,11 +68,23 @@ Route::middleware(['auth', 'role:superadmin'])->group(function () {
         Route::post('/import', [SantriController::class, 'import'])->name('import');
         Route::get('/kelola-kelas', [SantriController::class, 'kelolaKelas'])->name('kelola-kelas');
         Route::post('/kelola-kelas', [SantriController::class, 'updateKelolaKelas'])->name('kelola-kelas.update');
+        Route::post('/kenaikan-kelas', [SantriController::class, 'kenaikanKelas'])->name('kenaikan-kelas');
         Route::get('/{santri}', [SantriController::class, 'show'])->name('show');
         Route::get('/{santri}/edit', [SantriController::class, 'edit'])->name('edit');
         Route::put('/{santri}', [SantriController::class, 'update'])->name('update');
         Route::delete('/{santri}', [SantriController::class, 'destroy'])->name('destroy');
         Route::patch('/bulk-update', [SantriController::class, 'bulkUpdate'])->name('bulk-update');
+    });
+
+    // Tahun Ajaran
+    Route::prefix('admin/tahun-ajaran')->as('admin.tahun-ajaran.')->group(function () {
+        Route::get('/', [TahunAjaranController::class, 'index'])->name('index');
+        Route::get('/create', [TahunAjaranController::class, 'create'])->name('create');
+        Route::post('/', [TahunAjaranController::class, 'store'])->name('store');
+        Route::get('/{tahunAjaran}/edit', [TahunAjaranController::class, 'edit'])->name('edit');
+        Route::put('/{tahunAjaran}', [TahunAjaranController::class, 'update'])->name('update');
+        Route::post('/{tahunAjaran}/activate', [TahunAjaranController::class, 'activate'])->name('activate');
+        Route::delete('/{tahunAjaran}', [TahunAjaranController::class, 'destroy'])->name('destroy');
     });
 
     // Manajemen User

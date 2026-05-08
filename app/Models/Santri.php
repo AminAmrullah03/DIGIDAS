@@ -16,6 +16,18 @@ class Santri extends Model
     public function sppTagihan() { return $this->hasMany(SppTagihan::class, 'nis', 'nis'); }
     public function riwayatKelas() { return $this->hasMany(RiwayatKelas::class, 'nis', 'nis')->orderBy('created_at', 'desc'); }
 
+    /** Semua record kelas per tahun ajaran */
+    public function santriKelas()
+    {
+        return $this->hasMany(SantriKelas::class, 'nis', 'nis');
+    }
+
+    /** Kelas santri pada tahun ajaran tertentu */
+    public function kelasPadaTahun(int $tahunAjaranId): ?SantriKelas
+    {
+        return $this->santriKelas()->where('tahun_ajaran_id', $tahunAjaranId)->first();
+    }
+
     public function isAktif(): bool { return $this->status === 'aktif'; }
 
     public function getStatusLabelAttribute(): string {

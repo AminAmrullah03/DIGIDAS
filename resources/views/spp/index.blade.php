@@ -411,7 +411,7 @@
 
                 {{-- Month Grid --}}
                 <div class="grid-section">
-                    <p class="grid-title">Status SPP <span id="card-tahun">1446</span>H</p>
+                    <p class="grid-title">Status SPP <span id="card-tahun">{{ $tahunAjaran?->tahun_hijriah ?? '-' }}</span>H</p>
                     <div class="month-grid" id="card-spp-grid"></div>
                     <div class="legend" style="margin-top:10px;">
                         <div class="legend-item"><div class="legend-dot" style="background:#86efac;"></div>Lunas</div>
@@ -420,18 +420,20 @@
                     </div>
                 </div>
 
+                @php $nominalSppAktif = (int) ($tahunAjaran?->nominal_spp ?? 50000); @endphp
+
                 {{-- Payment Form --}}
                 <div class="pay-section">
                     <p class="pay-title">Input Pembayaran</p>
                     <form id="form-bayar">
                         <input type="hidden" id="form-nis" name="nis">
-                        <input type="hidden" id="form-tahun" name="tahun" value="1446">
+                        <input type="hidden" id="form-tahun-ajaran-id" name="tahun_ajaran_id" value="{{ $tahunAjaran?->id }}">
 
                         <div class="quick-amounts">
-                            <button type="button" class="quick-btn" data-amount="50000">50rb</button>
-                            <button type="button" class="quick-btn" data-amount="100000">100rb</button>
-                            <button type="button" class="quick-btn" data-amount="200000">200rb</button>
-                            <button type="button" class="quick-btn" data-amount="600000">600rb</button>
+                            <button type="button" class="quick-btn" data-amount="{{ $nominalSppAktif }}">{{ number_format($nominalSppAktif / 1000, 0, ',', '.') }}rb</button>
+                            <button type="button" class="quick-btn" data-amount="{{ $nominalSppAktif * 2 }}">{{ number_format(($nominalSppAktif * 2) / 1000, 0, ',', '.') }}rb</button>
+                            <button type="button" class="quick-btn" data-amount="{{ $nominalSppAktif * 4 }}">{{ number_format(($nominalSppAktif * 4) / 1000, 0, ',', '.') }}rb</button>
+                            <button type="button" class="quick-btn" data-amount="{{ $nominalSppAktif * 12 }}">{{ number_format(($nominalSppAktif * 12) / 1000, 0, ',', '.') }}rb</button>
                         </div>
 
                         <div class="form-row">
@@ -477,7 +479,7 @@ const nisInput    = document.getElementById('nis_input');
 const resultCard  = document.getElementById('result-card');
 let currentNis    = null;
 let currentTagihan = [];
-let currentTahun  = 1446;
+let currentTahunAjaranId  = {{ $tahunAjaran?->id ?? 'null' }};
 
 // ── Search ──
 document.getElementById('btn-cari').addEventListener('click', () => search(nisInput.value.trim()));
@@ -500,7 +502,7 @@ async function search(nis) {
     document.getElementById('btn-cari').disabled = true;
 
     try {
-        const res  = await fetch(`/spp/santri?nis=${encodeURIComponent(nis)}&tahun=${currentTahun}`, {
+        const res  = await fetch(`/spp/santri?nis=${encodeURIComponent(nis)}`, {
             headers: { 'Accept': 'application/json' }
         });
         const data = await res.json();
@@ -513,17 +515,17 @@ async function search(nis) {
 
         currentNis     = data.santri.nis;
         currentTagihan = data.tagihan;
-        currentTahun   = data.tahun;
+        currentTahunAjaranId = data.tahun_ajaran_id;
 
         // Populate card
         document.getElementById('card-initial').textContent = data.santri.nama.charAt(0).toUpperCase();
         document.getElementById('card-nama').textContent    = data.santri.nama;
         document.getElementById('card-meta').textContent   = `Kelas ${data.santri.kelas} • NIS: ${data.santri.nis}`;
-        document.getElementById('card-tahun').textContent  = data.tahun;
+        document.getElementById('card-tahun').textContent  = data.tahun_ajaran?.tahun_hijriah || '-';
         document.getElementById('card-tanggungan').textContent = formatRupiah(data.total_tanggungan);
         document.getElementById('card-jumlah-bulan').textContent = data.jumlah_bulan_belum + ' bulan';
         document.getElementById('form-nis').value   = data.santri.nis;
-        document.getElementById('form-tahun').value = data.tahun;
+        document.getElementById('form-tahun-ajaran-id').value = data.tahun_ajaran_id;
 
         renderGrid(data.tagihan);
 
@@ -609,7 +611,7 @@ document.getElementById('form-bayar').addEventListener('submit', async e => {
             },
             body: JSON.stringify({
                 nis: document.getElementById('form-nis').value,
-                tahun: parseInt(document.getElementById('form-tahun').value),
+                tahun_ajaran_id: parseInt(document.getElementById('form-tahun-ajaran-id').value),
                 nominal_bayar: nominal,
                 metode: document.querySelector('select[name="metode"]').value,
             })

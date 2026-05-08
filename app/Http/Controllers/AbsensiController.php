@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Absensi;
 use App\Models\Santri;
 use App\Models\JadwalAbsen;
+use App\Models\TahunAjaran;
 
 class AbsensiController extends Controller
 {
@@ -70,10 +71,13 @@ class AbsensiController extends Controller
             ]);
         }
 
+        $tahunAjaran = TahunAjaran::getAktif();
+
         // ✅ Simpan absensi baru (kegiatan sesuai jadwal)
         $absen = Absensi::create([
             'nis' => $santri->nis,
             'jadwal_id' => $jadwal->id,
+            'tahun_ajaran_id' => $tahunAjaran?->id,
             'status' => 'Hadir',
             'kegiatan' => $jadwal->nama_kegiatan,
             'waktu' => $now,
@@ -101,33 +105,7 @@ class AbsensiController extends Controller
         // Ambil daftar kegiatan dari jadwal aktif
         $kegiatanList = JadwalAbsen::where('aktif', true)->orderBy('nama_kegiatan')->get();
 
-        $rekap = collect();
-
-        // Hanya tampilkan data jika kelas dan kegiatan sudah dipilih
-        if ($kelasFilter && $kegiatanFilter) {
-            // Ambil semua santri dari kelas yang dipilih
-            $santriList = Santri::where('kelas', $kelasFilter)->orderBy('nama')->get();
-            
-            // Ambil jadwal kegiatan
-            $jadwal = JadwalAbsen::find($kegiatanFilter);
-
-            foreach ($santriList as $santri) {
-                // Cek apakah santri memiliki data absensi untuk tanggal dan kegiatan ini
-                $absensi = Absensi::where('nis', $santri->nis)
-                    ->where('jadwal_id', $kegiatanFilter)
-                    ->whereDate('waktu', $tanggal)
-                    ->first();
-
-                $rekap->push([
-                    'nis' => $santri->nis,
-                    'nama' => $santri->nama,
-                    'kelas' => $santri->kelas,
-                    'kegiatan' => $jadwal->nama_kegiatan ?? '-',
-                    'waktu' => $absensi ? $absensi->waktu : null,
-                    'status' => $absensi ? $absensi->status : 'Alpha',
-                ]);
-            }
-        }
+        $rekap = $this->buildRekapAbsensi($tanggal, $kelasFilter, $kegiatanFilter);
 
         return view('rekap', compact('rekap', 'kelasList', 'kegiatanList', 'kelasFilter', 'kegiatanFilter', 'tanggal'));
     }
@@ -139,35 +117,51 @@ class AbsensiController extends Controller
         $kelasFilter = $request->input('kelas');
         $kegiatanFilter = $request->input('kegiatan');
 
-        $rekap = collect();
-
-        // Hanya tampilkan data jika kelas dan kegiatan sudah dipilih
-        if ($kelasFilter && $kegiatanFilter) {
-            // Ambil semua santri dari kelas yang dipilih
-            $santriList = Santri::where('kelas', $kelasFilter)->orderBy('nama')->get();
-            
-            // Ambil jadwal kegiatan
-            $jadwal = JadwalAbsen::find($kegiatanFilter);
-
-            foreach ($santriList as $santri) {
-                // Cek apakah santri memiliki data absensi untuk tanggal dan kegiatan ini
-                $absensi = Absensi::where('nis', $santri->nis)
-                    ->where('jadwal_id', $kegiatanFilter)
-                    ->whereDate('waktu', $tanggal)
-                    ->first();
-
-                $rekap->push([
-                    'nis' => $santri->nis,
-                    'nama' => $santri->nama,
-                    'kelas' => $santri->kelas,
-                    'kegiatan' => $jadwal->nama_kegiatan ?? '-',
-                    'waktu' => $absensi ? $absensi->waktu : null,
-                    'status' => $absensi ? $absensi->status : 'Alpha',
-                ]);
-            }
-        }
+        $rekap = $this->buildRekapAbsensi($tanggal, $kelasFilter, $kegiatanFilter);
 
         return view('partials.rekap-table', compact('rekap'));
+    }
+
+    private function buildRekapAbsensi($tanggal, $kelasFilter, $kegiatanFilter)
+    {
+        $rekap = collect();
+
+        if (!$kegiatanFilter) {
+            return $rekap;
+        }
+
+        $jadwal = JadwalAbsen::find($kegiatanFilter);
+
+        if (!$jadwal) {
+            return $rekap;
+        }
+
+        $santriList = Santri::query()
+            ->when($kelasFilter, fn ($query) => $query->where('kelas', $kelasFilter))
+            ->orderBy('kelas')
+            ->orderBy('nama')
+            ->get();
+
+        $absensiByNis = Absensi::where('jadwal_id', $kegiatanFilter)
+            ->whereDate('waktu', $tanggal)
+            ->whereIn('nis', $santriList->pluck('nis'))
+            ->get()
+            ->keyBy('nis');
+
+        foreach ($santriList as $santri) {
+            $absensi = $absensiByNis->get($santri->nis);
+
+            $rekap->push([
+                'nis' => $santri->nis,
+                'nama' => $santri->nama,
+                'kelas' => $santri->kelas,
+                'kegiatan' => $jadwal->nama_kegiatan,
+                'waktu' => $absensi ? $absensi->waktu : null,
+                'status' => $absensi ? $absensi->status : 'Alpha',
+            ]);
+        }
+
+        return $rekap;
     }
 
     // ✅ Update status absensi (untuk edit dari halaman rekap)
@@ -207,10 +201,12 @@ class AbsensiController extends Controller
             // Update status yang sudah ada
             $absensi->update(['status' => $status]);
         } else {
+            $tahunAjaran = TahunAjaran::getAktif();
             // Buat record baru (untuk santri yang sebelumnya Alpha/tidak ada record)
             Absensi::create([
                 'nis' => $nis,
                 'jadwal_id' => $jadwalId,
+                'tahun_ajaran_id' => $tahunAjaran?->id,
                 'status' => $status,
                 'kegiatan' => $jadwal->nama_kegiatan,
                 'waktu' => $tanggal . ' 00:00:00', // Set waktu default untuk record manual

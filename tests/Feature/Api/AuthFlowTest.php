@@ -3,7 +3,7 @@
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
-test('api login returns bearer token and user payload', function () {
+test('api login returns token payload', function () {
     $user = User::factory()->create([
         'nip' => '1987654321',
         'password' => Hash::make('secret-password'),
@@ -17,22 +17,12 @@ test('api login returns bearer token and user payload', function () {
     ]);
 
     $response->assertOk()
-        ->assertJsonPath('success', true)
-        ->assertJsonPath('message', 'Login berhasil.')
-        ->assertJsonPath('data.token_type', 'Bearer')
-        ->assertJsonPath('data.user.id', $user->id)
-        ->assertJsonPath('data.user.nip', $user->nip)
         ->assertJsonStructure([
-            'success',
-            'message',
-            'data' => [
-                'token_type',
-                'token',
-                'user' => ['id', 'name', 'nip', 'email', 'role'],
-            ],
+            'token',
         ]);
 
-    expect($response->json('data.token'))->toBeString()->not->toBeEmpty();
+    expect(array_keys($response->json()))->toBe(['token']);
+    expect($response->json('token'))->toBeString()->not->toBeEmpty();
 
     $this->assertDatabaseHas('personal_access_tokens', [
         'tokenable_id' => $user->id,
@@ -99,7 +89,7 @@ test('authenticated user can fetch me and logout current token', function () {
         'device_name' => 'flutter-test',
     ]);
 
-    $token = $login->json('data.token');
+    $token = $login->json('token');
 
     $this->withHeader('Authorization', "Bearer {$token}")
         ->getJson('/api/me')

@@ -31,11 +31,9 @@ class AuthController extends Controller
             ?? $request->userAgent()
             ?? 'flutter-android';
 
-        return ApiResponse::success([
-            'token_type' => 'Bearer',
+        return response()->json([
             'token' => $user->createToken($deviceName)->plainTextToken,
-            'user' => $this->userPayload($user),
-        ], 'Login berhasil.');
+        ]);
     }
 
     public function me(Request $request): JsonResponse

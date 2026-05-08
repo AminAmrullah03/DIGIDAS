@@ -9,20 +9,53 @@ use App\Http\Controllers\Api\SppController;
 use App\Support\ApiResponse;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| PUBLIC ROUTES (tanpa login)
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/ping', function () {
     return ApiResponse::success(null, 'API hidup');
 });
 
 Route::post('/login', [AuthController::class, 'login']);
 
+
+/*
+|--------------------------------------------------------------------------
+| PROTECTED ROUTES (WAJIB LOGIN)
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware('auth:sanctum')->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | AUTH USER
+    |--------------------------------------------------------------------------
+    */
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/logout-all', [AuthController::class, 'logoutAll']);
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | SANTRI (semua user login bisa lihat list)
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/santri', [SantriController::class, 'index']);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ROLE: SUPERADMIN & GURU
+    |--------------------------------------------------------------------------
+    */
     Route::middleware('role:superadmin,guru')->group(function () {
+
         Route::get('/santri/kelas', [SantriController::class, 'kelas']);
-        Route::get('/santri', [SantriController::class, 'index']);
         Route::get('/santri/{santri:nis}', [SantriController::class, 'show']);
 
         Route::get('/jadwal-absen', [JadwalAbsenController::class, 'index']);
@@ -39,9 +72,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/izin/status', [IzinController::class, 'updateStatus']);
     });
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | ROLE: SUPERADMIN ONLY (SPP)
+    |--------------------------------------------------------------------------
+    */
     Route::middleware('role:superadmin')->prefix('spp')->group(function () {
         Route::get('/tagihan', [SppController::class, 'tagihan']);
         Route::post('/bayar', [SppController::class, 'bayar']);
         Route::get('/riwayat', [SppController::class, 'riwayat']);
     });
+
 });

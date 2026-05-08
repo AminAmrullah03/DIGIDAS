@@ -53,7 +53,15 @@ Body:
 }
 ```
 
-Response sukses berisi `data.token`, `data.token_type`, dan `data.user`. Simpan token di secure storage Flutter.
+Response sukses:
+
+```json
+{
+  "token": "TOKEN_DARI_LOGIN"
+}
+```
+
+Simpan token di secure storage Flutter.
 
 ### User Aktif
 
@@ -175,7 +183,7 @@ Body pembayaran:
 
 ## Format Error
 
-Semua response API memakai envelope yang sama:
+Response API selain login sukses memakai envelope yang sama:
 
 ```json
 {

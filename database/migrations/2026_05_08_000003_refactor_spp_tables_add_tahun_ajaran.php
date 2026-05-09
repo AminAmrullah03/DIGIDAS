@@ -27,13 +27,19 @@ return new class extends Migration
         $this->mapTahunAjaranId('spp_pembayaran');
 
         if (Schema::hasColumn('spp_tagihan', 'tahun')) {
-            Schema::table('spp_tagihan', function (Blueprint $table) {
-                try {
+            // Drop unique index dulu dalam statement terpisah — MySQL tidak
+            // mengizinkan drop index dan drop column dalam satu ALTER TABLE
+            // ketika index tersebut masih direferensikan secara internal.
+            try {
+                Schema::table('spp_tagihan', function (Blueprint $table) {
                     $table->dropUnique('spp_tagihan_nis_bulan_tahun_unique');
-                } catch (Throwable $e) {
-                    // Constraint may already be gone on databases fixed manually.
-                }
+                });
+            } catch (Throwable $e) {
+                // Constraint may already be gone on databases fixed manually.
+            }
 
+            // Baru drop column setelah index sudah hilang
+            Schema::table('spp_tagihan', function (Blueprint $table) {
                 $table->dropColumn('tahun');
             });
         }

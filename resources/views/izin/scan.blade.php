@@ -141,6 +141,17 @@
 }
 .dark .form-textarea { background:#0f172a; border-color:#334155; color:#f1f5f9; }
 .form-textarea:focus { border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,0.1); }
+.form-input {
+    width:100%; padding:10px 12px; border-radius:10px;
+    border:1.5px solid #e2e8f0; background:#f8fafc;
+    color:#1e293b; font-size:0.875rem;
+    outline:none; transition:border-color 0.2s;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    box-sizing:border-box;
+}
+.dark .form-input { background:#0f172a; border-color:#334155; color:#f1f5f9; }
+.form-input:focus { border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,0.1); }
+.form-help { font-size:0.7rem; color:#94a3b8; margin:4px 0 0; }
 
 .form-actions { display:flex; gap:10px; margin-top:12px; }
 .btn-batal {
@@ -196,9 +207,9 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:20px;height:20px;display:inline;margin-right:6px;vertical-align:-3px;">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/>
                     </svg>
-                    Input Perizinan
+                    Input Izin Keluar
                 </h2>
-                <p>Scan QR atau ketik NIS untuk catat izin santri</p>
+                <p>Scan QR atau ketik NIS untuk catat izin keluar santri</p>
             </div>
             <div class="card-body">
                 <div class="input-group">
@@ -222,7 +233,7 @@
                 <div class="quick-links">
                     <a href="{{ route('izin.rekap') }}" class="quick-link">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:13px;height:13px;display:inline;margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
-                        Rekap Izin
+                        Rekap Izin Keluar
                     </a>
                 </div>
             </div>
@@ -258,6 +269,9 @@
                 <div class="izin-form-section" id="form-izin-section">
                     <label class="form-label">Keperluan / Tujuan Izin</label>
                     <textarea id="keperluan" class="form-textarea" placeholder="Contoh: Pulang karena ada acara keluarga..."></textarea>
+                    <label class="form-label" style="margin-top:10px;">Tenggat Kembali</label>
+                    <input id="batas_waktu_kembali" type="datetime-local" class="form-input">
+                    <p class="form-help">Maksimal 1 hari dari waktu izin keluar.</p>
                     <div class="form-actions">
                         <button class="btn-batal" onclick="closeCard()">Batal</button>
                         <button class="btn-izin" id="btn-simpan-izin" onclick="simpanIzin()">
@@ -267,7 +281,7 @@
                     </div>
                 </div>
 
-                {{-- Tombol Kembali (jika sedang izin) --}}
+                {{-- Tombol Kembali (jika sedang izin keluar) --}}
                 <div class="izin-form-section" id="form-kembali-section" style="display:none;">
                     <button class="btn-kembali" id="btn-kembali" onclick="catatKembali()">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px;display:inline;margin-right:6px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/></svg>
@@ -290,10 +304,12 @@ const nisInput = document.getElementById('nis_input');
 let currentNis = null;
 let currentIzinId = null;
 let debounceTimer = null;
+let scanLocked = false;
+const batasInput = document.getElementById('batas_waktu_kembali');
 
 // ── Search ──
 document.getElementById('btn-cari').addEventListener('click', () => search(nisInput.value.trim()));
-nisInput.addEventListener('keydown', e => { if(e.key==='Enter') search(nisInput.value.trim()); });
+nisInput.addEventListener('keydown', e => { if(e.key==='Enter') search(nisInput.value.trim(), true); });
 nisInput.addEventListener('input', () => {
     clearTimeout(debounceTimer);
     const nis = nisInput.value.trim();
@@ -301,7 +317,7 @@ nisInput.addEventListener('input', () => {
     debounceTimer = setTimeout(() => search(nis), 500);
 });
 
-async function search(nis) {
+async function search(nis, autoKembali = false) {
     if(!nis) { showToast('error','Masukkan NIS terlebih dahulu!'); return; }
     const btn = document.getElementById('btn-cari');
     btn.textContent='...'; btn.disabled=true;
@@ -318,15 +334,24 @@ async function search(nis) {
         document.getElementById('card-meta').textContent   = `Kelas ${data.santri.kelas} • NIS: ${data.santri.nis}`;
 
         if(data.izin_aktif) {
+            if(autoKembali) {
+                await catatKembali(true);
+                return;
+            }
+
             document.getElementById('izin-aktif-section').style.display='block';
-            document.getElementById('izin-aktif-msg').textContent = `Sedang dalam izin: ${data.izin_aktif.keperluan}`;
-            document.getElementById('izin-aktif-sub').textContent = `Keluar sejak: ${data.izin_aktif.waktu_keluar}`;
+            document.getElementById('izin-aktif-msg').textContent = `Sedang dalam izin keluar: ${data.izin_aktif.keperluan}`;
+            document.getElementById('izin-aktif-sub').textContent = `Keluar sejak: ${data.izin_aktif.waktu_keluar} • Tenggat: ${data.izin_aktif.batas_waktu_kembali} • Durasi: ${data.izin_aktif.durasi_label}`;
             document.getElementById('form-izin-section').style.display='none';
             document.getElementById('form-kembali-section').style.display='block';
         } else {
             document.getElementById('izin-aktif-section').style.display='none';
             document.getElementById('form-izin-section').style.display='block';
             document.getElementById('form-kembali-section').style.display='none';
+            syncBatasRange();
+            if(data.izin_terakhir?.status === 'Kabur') {
+                showToast('warning', 'Izin keluar terakhir santri ini tercatat Kabur.');
+            }
         }
 
         document.getElementById('santri-result').style.display='block';
@@ -341,21 +366,30 @@ async function search(nis) {
 // ── Simpan izin ──
 async function simpanIzin() {
     const keperluan = document.getElementById('keperluan').value.trim();
-    if(!keperluan) { showToast('error','Masukkan keperluan izin!'); return; }
+    if(!keperluan) { showToast('error','Masukkan keperluan izin keluar!'); return; }
+    const batasWaktu = batasInput.value;
+    if(!batasWaktu) { showToast('error','Tentukan tenggat kembali!'); return; }
     const btn = document.getElementById('btn-simpan-izin');
     btn.disabled=true; btn.textContent='Menyimpan...';
     try {
         const res  = await fetch('/izin/store', {
             method:'POST',
             headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'Accept':'application/json'},
-            body: JSON.stringify({nis:currentNis, keperluan})
+            body: JSON.stringify({nis:currentNis, keperluan, batas_waktu_kembali:batasWaktu})
         });
         const data = await res.json();
         if(data.success) {
-            showToast('success', data.message || 'Izin berhasil dicatat!');
-            closeCard();
+            showToast('success', data.message || 'Izin keluar berhasil dicatat!');
+            currentIzinId = data.data?.id || null;
+            document.getElementById('izin-aktif-section').style.display='block';
+            document.getElementById('izin-aktif-msg').textContent = `Sedang dalam izin keluar: ${keperluan}`;
+            document.getElementById('izin-aktif-sub').textContent = `Keluar sejak: ${data.data?.waktu_keluar || 'baru saja'} • Tenggat: ${data.data?.batas_waktu_kembali || '-'} • Durasi: ${data.data?.durasi_label || '-'}`;
+            document.getElementById('form-izin-section').style.display='none';
+            document.getElementById('form-kembali-section').style.display='block';
+            document.getElementById('keperluan').value='';
+            nisInput.value='';
         } else {
-            showToast('error', data.message || 'Gagal mencatat izin');
+            showToast('error', data.message || 'Gagal mencatat izin keluar');
         }
     } catch(err) {
         showToast('error','Terjadi kesalahan');
@@ -365,9 +399,9 @@ async function simpanIzin() {
 }
 
 // ── Catat kembali ──
-async function catatKembali() {
+async function catatKembali(dariScan = false) {
     const btn = document.getElementById('btn-kembali');
-    btn.disabled=true; btn.textContent='Menyimpan...';
+    btn.disabled=true; btn.textContent=dariScan ? 'Scan kembali diproses...' : 'Menyimpan...';
     try {
         const res  = await fetch('/izin/kembali', {
             method:'POST',
@@ -376,7 +410,7 @@ async function catatKembali() {
         });
         const data = await res.json();
         if(data.success) {
-            showToast('success', data.message || 'Santri sudah kembali!');
+            showToast(data.data?.status === 'Terlambat' ? 'warning' : 'success', data.message || 'Santri sudah kembali!');
             closeCard();
         } else {
             showToast('error', data.message || 'Gagal mencatat kembali');
@@ -391,8 +425,27 @@ async function catatKembali() {
 function closeCard() {
     document.getElementById('santri-result').style.display='none';
     document.getElementById('keperluan').value='';
+    syncBatasRange();
     nisInput.value=''; nisInput.focus();
     currentNis=null; currentIzinId=null;
+}
+
+function pad(num) {
+    return String(num).padStart(2, '0');
+}
+
+function toDatetimeLocalValue(date) {
+    return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function syncBatasRange() {
+    const now = new Date();
+    const min = new Date(now.getTime() + 60 * 1000);
+    const defaultDeadline = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+    const max = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    batasInput.min = toDatetimeLocalValue(min);
+    batasInput.max = toDatetimeLocalValue(max);
+    batasInput.value = toDatetimeLocalValue(defaultDeadline > max ? max : defaultDeadline);
 }
 
 // ── Camera ──
@@ -411,7 +464,13 @@ btnScan.addEventListener('click', async () => {
         await html5QrCode.start(
             back ? back.id : {facingMode:'environment'},
             {fps:10, qrbox:{width:240,height:240}, aspectRatio:1.0},
-            text => { stopCamera(); nisInput.value=text; search(text); },
+            text => {
+                if(scanLocked) return;
+                scanLocked = true;
+                stopCamera();
+                nisInput.value=text;
+                search(text, true).finally(() => setTimeout(() => scanLocked = false, 1000));
+            },
             ()=>{}
         );
         isScanning=true; btnScan.textContent='● Kamera Aktif';
@@ -437,6 +496,9 @@ function showToast(type, message) {
     setTimeout(()=>{ toast.style.opacity='0'; toast.style.transition='opacity 0.3s'; setTimeout(()=>toast.remove(),300); }, 3500);
 }
 
-window.addEventListener('load', ()=>nisInput.focus());
+window.addEventListener('load', ()=>{
+    syncBatasRange();
+    nisInput.focus();
+});
 </script>
 </x-app-layout>

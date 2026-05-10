@@ -3,6 +3,8 @@
 $totalIzin    = $izinList->count();
 $belumKembali = $izinList->where('status','Belum Kembali')->count();
 $sudahKembali = $izinList->where('status','Sudah Kembali')->count();
+$terlambat = $izinList->where('status','Terlambat')->count();
+$kabur = $izinList->where('status','Kabur')->count();
 @endphp
 
 <style>
@@ -132,8 +134,18 @@ tbody tr:last-child td { border-bottom:none; }
     background:#dcfce7; color:#166534;
     border:1px solid #86efac;
 }
+.badge-terlambat {
+    background:#fee2e2; color:#991b1b;
+    border:1px solid #fca5a5;
+}
+.badge-kabur {
+    background:#e2e8f0; color:#334155;
+    border:1px solid #cbd5e1;
+}
 .dark .badge-belum { background:rgba(245,158,11,0.15); color:#fcd34d; border-color:rgba(252,211,77,0.3); }
 .dark .badge-sudah { background:rgba(22,163,74,0.15); color:#4ade80; border-color:rgba(74,222,128,0.3); }
+.dark .badge-terlambat { background:rgba(220,38,38,0.15); color:#fca5a5; border-color:rgba(252,165,165,0.3); }
+.dark .badge-kabur { background:rgba(148,163,184,0.16); color:#cbd5e1; border-color:rgba(203,213,225,0.25); }
 
 /* ── Kembali button ── */
 .btn-kembali {
@@ -179,6 +191,7 @@ tbody tr:last-child td { border-bottom:none; }
 @keyframes toastIn { from{opacity:0;transform:translateX(40px) scale(0.9)} to{opacity:1;transform:translateX(0) scale(1)} }
 .toast-success { background:linear-gradient(135deg,#059669,#10b981); }
 .toast-error   { background:linear-gradient(135deg,#dc2626,#ef4444); }
+.toast-warning { background:linear-gradient(135deg,#d97706,#f59e0b); }
 </style>
 
 <div class="page-bg">
@@ -190,13 +203,13 @@ tbody tr:last-child td { border-bottom:none; }
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:20px;height:20px;display:inline;margin-right:6px;vertical-align:-3px;">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/>
                 </svg>
-                Rekap Perizinan Santri
+                Rekap Izin Keluar Santri
             </h1>
-            <p>Pantau santri yang sedang izin — {{ now()->locale('id')->isoFormat('dddd, D MMMM Y') }}</p>
+            <p>Pantau santri yang sedang izin keluar — {{ now()->locale('id')->isoFormat('dddd, D MMMM Y') }}</p>
             <div class="banner-actions">
                 <a href="{{ route('izin.index') }}" class="btn-white">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                    Input Izin
+                    Input Izin Keluar
                 </a>
                 <a href="{{ route('absen') }}" class="btn-white">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75z"/></svg>
@@ -244,6 +257,28 @@ tbody tr:last-child td { border-bottom:none; }
                     <p class="stat-value" style="color:#059669;">{{ $sudahKembali }}</p>
                 </div>
             </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#fee2e2;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#dc2626" style="width:20px;height:20px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="stat-label">Terlambat</p>
+                    <p class="stat-value" style="color:#dc2626;">{{ $terlambat }}</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#e2e8f0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#475569" style="width:20px;height:20px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008v.008H12v-.008zm-9.303-.374c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="stat-label">Kabur</p>
+                    <p class="stat-value" style="color:#475569;">{{ $kabur }}</p>
+                </div>
+            </div>
         </div>
 
         {{-- Filter --}}
@@ -269,6 +304,8 @@ tbody tr:last-child td { border-bottom:none; }
                             <option value="">Semua Status</option>
                             <option value="Belum Kembali" {{ $statusFilter == 'Belum Kembali' ? 'selected' : '' }}>Belum Kembali</option>
                             <option value="Sudah Kembali" {{ $statusFilter == 'Sudah Kembali' ? 'selected' : '' }}>Sudah Kembali</option>
+                            <option value="Terlambat" {{ $statusFilter == 'Terlambat' ? 'selected' : '' }}>Terlambat</option>
+                            <option value="Kabur" {{ $statusFilter == 'Kabur' ? 'selected' : '' }}>Kabur</option>
                         </select>
                     </div>
                     <button type="submit" class="btn-filter">
@@ -289,8 +326,10 @@ tbody tr:last-child td { border-bottom:none; }
                             <th>Santri</th>
                             <th>Kelas</th>
                             <th>Keperluan</th>
+                            <th>Durasi / Tenggat</th>
                             <th>Waktu Keluar</th>
                             <th>Waktu Kembali</th>
+                            <th>Ketepatan</th>
                             <th>Status</th>
                             <th>Aksi</th>
                         </tr>
@@ -315,6 +354,13 @@ tbody tr:last-child td { border-bottom:none; }
                                 <p style="margin:0;font-size:0.82rem;color:#374151;white-space:normal;line-height:1.4;" class="dark:text-slate-300">{{ $izin->keperluan }}</p>
                             </td>
                             <td>
+                                <span style="font-size:0.82rem;font-weight:600;color:#1e293b;" class="dark:text-slate-200">{{ $izin->durasi_label }}</span>
+                                <p style="font-size:0.7rem;color:#94a3b8;margin:2px 0 0;">
+                                    Tenggat:
+                                    {{ $izin->batas_waktu_kembali ? \Carbon\Carbon::parse($izin->batas_waktu_kembali)->setTimezone('Asia/Jakarta')->format('d/m H:i') : '-' }}
+                                </p>
+                            </td>
+                            <td>
                                 <span style="font-size:0.82rem;font-weight:500;color:#1e293b;" class="dark:text-slate-200">
                                     {{ \Carbon\Carbon::parse($izin->waktu_keluar)->setTimezone('Asia/Jakarta')->format('H:i') }}
                                 </span>
@@ -330,17 +376,20 @@ tbody tr:last-child td { border-bottom:none; }
                                 @endif
                             </td>
                             <td>
-                                @if($izin->status == 'Belum Kembali')
-                                    <span class="badge badge-belum">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:11px;height:11px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        Belum Kembali
-                                    </span>
-                                @else
-                                    <span class="badge badge-sudah">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:11px;height:11px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        Sudah Kembali
-                                    </span>
-                                @endif
+                                <span style="font-size:0.78rem;color:#64748b;font-weight:600;">{{ $izin->ketepatan_label }}</span>
+                            </td>
+                            <td>
+                                @php
+                                    $badgeClass = match($izin->status) {
+                                        'Sudah Kembali' => 'badge-sudah',
+                                        'Terlambat' => 'badge-terlambat',
+                                        'Kabur' => 'badge-kabur',
+                                        default => 'badge-belum',
+                                    };
+                                @endphp
+                                <span class="badge {{ $badgeClass }}">
+                                    {{ $izin->status }}
+                                </span>
                             </td>
                             <td>
                                 @if($izin->status == 'Belum Kembali')
@@ -358,14 +407,14 @@ tbody tr:last-child td { border-bottom:none; }
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8">
+                            <td colspan="10">
                                 <div class="empty-state">
                                     <div class="empty-icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#94a3b8" style="width:26px;height:26px;">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/>
                                         </svg>
                                     </div>
-                                    <p style="font-weight:700;font-size:0.95rem;color:#475569;margin:0 0 4px;">Tidak ada data izin</p>
+                                    <p style="font-weight:700;font-size:0.95rem;color:#475569;margin:0 0 4px;">Tidak ada data izin keluar</p>
                                     <p style="font-size:0.8rem;color:#94a3b8;margin:0;">Coba ubah filter tanggal atau kelas</p>
                                 </div>
                             </td>
@@ -384,6 +433,12 @@ tbody tr:last-child td { border-bottom:none; }
                     </span>
                     <span style="display:flex;align-items:center;gap:4px;font-size:0.72rem;color:#94a3b8;">
                         <span style="width:10px;height:10px;border-radius:3px;background:#86efac;display:inline-block;"></span> Sudah Kembali
+                    </span>
+                    <span style="display:flex;align-items:center;gap:4px;font-size:0.72rem;color:#94a3b8;">
+                        <span style="width:10px;height:10px;border-radius:3px;background:#fca5a5;display:inline-block;"></span> Terlambat
+                    </span>
+                    <span style="display:flex;align-items:center;gap:4px;font-size:0.72rem;color:#94a3b8;">
+                        <span style="width:10px;height:10px;border-radius:3px;background:#cbd5e1;display:inline-block;"></span> Kabur
                     </span>
                 </div>
             </div>
@@ -412,16 +467,19 @@ async function catatKembali(izinId, btn) {
         const data = await res.json();
 
         if (data.success) {
-            showToast('success', data.message || 'Berhasil dicatat kembali!');
+            const status = data.data?.status || 'Sudah Kembali';
+            showToast(status === 'Terlambat' ? 'warning' : 'success', data.message || 'Berhasil dicatat kembali!');
             // Update row tanpa reload
             const row  = btn.closest('tr');
             // Update badge
-            const badgeCell = row.querySelector('td:nth-child(7)');
-            badgeCell.innerHTML = `<span class="badge badge-sudah"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:11px;height:11px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Sudah Kembali</span>`;
+            const badgeCell = row.querySelector('td:nth-child(9)');
+            const badgeClass = status === 'Terlambat' ? 'badge-terlambat' : 'badge-sudah';
+            badgeCell.innerHTML = `<span class="badge ${badgeClass}">${status}</span>`;
             // Update waktu kembali
             const now = new Date();
-            const jam = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-            row.querySelector('td:nth-child(6)').innerHTML = `<span style="font-size:0.82rem;font-weight:500;color:#059669;">${jam}</span>`;
+            const jam = data.data?.waktu_kembali || String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+            row.querySelector('td:nth-child(7)').innerHTML = `<span style="font-size:0.82rem;font-weight:500;color:#059669;">${jam}</span>`;
+            row.querySelector('td:nth-child(8)').innerHTML = `<span style="font-size:0.78rem;color:#64748b;font-weight:600;">${data.data?.ketepatan_label || 'Tepat waktu'}</span>`;
             // Remove button
             btn.closest('td').innerHTML = `<span style="font-size:0.75rem;color:#94a3b8;">—</span>`;
             // Update stats
@@ -441,16 +499,20 @@ async function catatKembali(izinId, btn) {
 function updateStats() {
     const belumBadges = document.querySelectorAll('.badge-belum').length;
     const sudahBadges = document.querySelectorAll('.badge-sudah').length;
-    // Update stat cards (index 1 = belum, index 2 = sudah)
+    const terlambatBadges = document.querySelectorAll('.badge-terlambat').length;
+    const kaburBadges = document.querySelectorAll('.badge-kabur').length;
     const statValues = document.querySelectorAll('.stat-value');
     if(statValues[1]) statValues[1].textContent = belumBadges;
     if(statValues[2]) statValues[2].textContent = sudahBadges;
+    if(statValues[3]) statValues[3].textContent = terlambatBadges;
+    if(statValues[4]) statValues[4].textContent = kaburBadges;
 }
 
 function showToast(type, message) {
     const toast = document.createElement('div');
-    toast.className = `toast toast-${type === 'error' ? 'error' : 'success'}`;
-    toast.innerHTML = `<span>${type === 'error' ? '✕' : '✓'}</span> ${message}`;
+    const cls = type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'success';
+    toast.className = `toast toast-${cls}`;
+    toast.innerHTML = `<span>${type === 'error' ? '✕' : type === 'warning' ? '!' : '✓'}</span> ${message}`;
     document.getElementById('toast-container').appendChild(toast);
     setTimeout(() => {
         toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s';

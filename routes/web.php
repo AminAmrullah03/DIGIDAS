@@ -38,12 +38,13 @@ Route::middleware(['auth', 'role:superadmin,guru'])->group(function () {
     Route::post('/rekap/update-status', [AbsensiController::class, 'updateStatus'])->name('rekap.updateStatus');
     Route::get('/rekap-data', [AbsensiController::class, 'rekapData'])->name('rekap.data');
 
-    // Perizinan
+    // Izin Keluar
     Route::prefix('izin')->as('izin.')->group(function () {
         Route::get('/', [IzinController::class, 'index'])->name('index');
         Route::get('/santri', [IzinController::class, 'getSantri'])->name('santri');
         Route::post('/store', [IzinController::class, 'store'])->name('store');
         Route::post('/kembali', [IzinController::class, 'kembali'])->name('kembali');
+        Route::post('/{izin}/kembali', [IzinController::class, 'kembaliById'])->name('kembaliById');
         Route::get('/rekap', [IzinController::class, 'rekap'])->name('rekap');
         Route::post('/update-status', [IzinController::class, 'updateStatus'])->name('updateStatus');
     });

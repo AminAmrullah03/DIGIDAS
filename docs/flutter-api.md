@@ -132,7 +132,7 @@ Body:
 
 Status yang valid: `Hadir`, `Izin`, `Sakit`, `Alpha`.
 
-## Izin
+## Izin Keluar
 
 Endpoint ini bisa diakses role `superadmin` dan `guru`.
 
@@ -142,14 +142,19 @@ Endpoint ini bisa diakses role `superadmin` dan `guru`.
 - `GET /izin/rekap?tanggal=2026-05-02&status=Belum%20Kembali`
 - `PATCH /izin/status`
 
-Body buat izin:
+Status izin keluar yang valid: `Belum Kembali`, `Sudah Kembali`, `Terlambat`, `Kabur`.
+
+Body buat izin keluar:
 
 ```json
 {
   "nis": "20240001",
-  "keperluan": "Ke klinik"
+  "keperluan": "Ke klinik",
+  "batas_waktu_kembali": "2026-05-02 14:30:00"
 }
 ```
+
+`batas_waktu_kembali` harus lebih besar dari waktu sekarang dan maksimal 1 hari dari waktu izin dibuat.
 
 Body kembali:
 

@@ -263,24 +263,24 @@
                         </div>
                     </div>
 
-                    {{-- Dropdown: Perizinan --}}
+                    {{-- Dropdown: Izin Keluar --}}
                     <div class="nav-dropdown-wrap" x-data="{ izinOpen: false }" @click.outside="izinOpen = false" style="position:relative;">
                         <button @click="izinOpen = !izinOpen"
                             class="nav-pill {{ request()->routeIs('izin.*') ? 'active' : '' }}"
                             :class="{ 'active': izinOpen }">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            Perizinan
+                            Izin Keluar
                             <svg class="chevron" :style="izinOpen ? 'transform:rotate(180deg)' : ''" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                         </button>
                         <div x-show="izinOpen" class="nav-dropdown" style="display:none;left:0;right:auto;min-width:180px;">
                             <div style="padding:4px 0;">
                                 <a href="{{ route('izin.index') }}" class="{{ request()->routeIs('izin.index') ? 'active-item' : '' }}">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                    Input Izin
+                                    Input Izin Keluar
                                 </a>
                                 <a href="{{ route('izin.rekap') }}" class="{{ request()->routeIs('izin.rekap') ? 'active-item' : '' }}">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                                    Rekap Izin
+                                    Rekap Izin Keluar
                                 </a>
                             </div>
                         </div>
@@ -399,16 +399,16 @@
                 Rekap Absensi
             </a>
 
-            {{-- Perizinan Section --}}
+            {{-- Izin Keluar Section --}}
             <div style="height:1px;background:rgba(255,255,255,0.06);margin:4px 20px;"></div>
-            <div style="padding:6px 20px 4px;font-size:0.65rem;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;">Perizinan</div>
+            <div style="padding:6px 20px 4px;font-size:0.65rem;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;">Izin Keluar</div>
             <a href="{{ route('izin.index') }}" class="mobile-pill mobile-sub {{ request()->routeIs('izin.index') ? 'active' : '' }}">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                Input Izin
+                Input Izin Keluar
             </a>
             <a href="{{ route('izin.rekap') }}" class="mobile-pill mobile-sub {{ request()->routeIs('izin.rekap') ? 'active' : '' }}">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                Rekap Izin
+                Rekap Izin Keluar
             </a>
 
             {{-- Admin Section (superadmin only) --}}

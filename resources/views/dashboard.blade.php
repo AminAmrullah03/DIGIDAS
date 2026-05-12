@@ -313,6 +313,146 @@
             </a>
         </div>
 
+        {{-- ── Izin Pulang ── --}}
+        <div class="section-divider"></div>
+        <div class="section-heading">
+            <div class="section-icon section-icon-green">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#10b981" style="width:18px;height:18px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l9.204-8.284a.75.75 0 011.004 0L21.75 12M4.5 10.5v9.75h15V10.5"/>
+                </svg>
+            </div>
+            <h2>Izin Pulang</h2>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            <a href="{{ route('izin-pulang.index') }}" class="dash-card card-emerald">
+                <div class="card-icon-wrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:26px;height:26px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/>
+                    </svg>
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <p class="card-title">Input Izin Pulang</p>
+                    <p class="card-desc">Scan QR untuk input izin pulang santri</p>
+                </div>
+                <svg class="card-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </a>
+
+            <a href="{{ route('izin-pulang.rekap') }}" class="dash-card card-teal">
+                <div class="card-icon-wrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:26px;height:26px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z"/>
+                    </svg>
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <p class="card-title">Rekap Izin Pulang</p>
+                    <p class="card-desc">Catat kembali santri dari izin pulang</p>
+                </div>
+                <svg class="card-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </a>
+        </div>
+
+        {{-- ── Perpulangan ── --}}
+        <div class="section-divider"></div>
+        <div class="section-heading">
+            <div class="section-icon section-icon-green">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#10b981" style="width:18px;height:18px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0110.5 3h6a2.25 2.25 0 012.25 2.25v13.5A2.25 2.25 0 0116.5 21h-6a2.25 2.25 0 01-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25"/>
+                </svg>
+            </div>
+            <h2>Perpulangan</h2>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+
+            {{-- Card: TTD Musrif --}}
+            <a href="{{ route('perpulangan.scan.musrif') }}" class="dash-card card-green">
+                <div class="card-icon-wrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:26px;height:26px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <p class="card-title">TTD Musrif</p>
+                    <p class="card-desc">Scan QR & berikan tanda tangan musrif</p>
+                </div>
+                <svg class="card-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </a>
+
+            {{-- Card: TTD SPP (superadmin only) --}}
+            @if(Auth::user()->isSuperAdmin())
+            <a href="{{ route('perpulangan.scan.spp') }}" class="dash-card card-emerald">
+                <div class="card-icon-wrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:26px;height:26px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75"/>
+                    </svg>
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <p class="card-title">TTD SPP</p>
+                    <p class="card-desc">Verifikasi lunas SPP santri</p>
+                </div>
+                <svg class="card-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </a>
+            @endif
+
+            {{-- Card: Checkpoint Keamanan --}}
+            <a href="{{ route('perpulangan.scan.keamanan') }}" class="dash-card card-teal">
+                <div class="card-icon-wrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:26px;height:26px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <p class="card-title">Checkpoint Keamanan</p>
+                    <p class="card-desc">Cek kelengkapan TTD & izinkan keluar</p>
+                </div>
+                <svg class="card-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </a>
+
+            {{-- Card: Scan Kembali --}}
+            <a href="{{ route('perpulangan.scan.kembali') }}" class="dash-card card-lime">
+                <div class="card-icon-wrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:26px;height:26px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5L12 3l9 7.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/>
+                    </svg>
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <p class="card-title">Scan Kembali</p>
+                    <p class="card-desc">Catat santri yang kembali dari liburan</p>
+                </div>
+                <svg class="card-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </a>
+
+            {{-- Card: Rekap Perpulangan (semua role) --}}
+            <a href="{{ route('admin.perpulangan.rekap') }}" class="dash-card card-green">
+                <div class="card-icon-wrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:26px;height:26px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/>
+                    </svg>
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <p class="card-title">Rekap Perpulangan</p>
+                    <p class="card-desc">Pantau status kembali santri per event</p>
+                </div>
+                <svg class="card-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </a>
+
+            {{-- Card: Kelola Event (superadmin only) --}}
+            @if(Auth::user()->isSuperAdmin())
+            <a href="{{ route('admin.perpulangan.index') }}" class="dash-card card-emerald">
+                <div class="card-icon-wrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:26px;height:26px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0110.5 3h6a2.25 2.25 0 012.25 2.25v13.5A2.25 2.25 0 0116.5 21h-6a2.25 2.25 0 01-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25"/>
+                    </svg>
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <p class="card-title">Kelola Perpulangan</p>
+                    <p class="card-desc">Tambah & kelola event perpulangan santri</p>
+                </div>
+                <svg class="card-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </a>
+            @endif
+
+        </div>
+
         {{-- ── Manajemen User (superadmin only) ── --}}
         @if(Auth::user()->isSuperAdmin())
         <div class="section-divider"></div>

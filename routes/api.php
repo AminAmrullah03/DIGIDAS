@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AbsensiController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\IzinController;
 use App\Http\Controllers\Api\JadwalAbsenController;
+use App\Http\Controllers\Api\PerpulanganController;
 use App\Http\Controllers\Api\SantriController;
 use App\Http\Controllers\Api\SppController;
 use App\Support\ApiResponse;
@@ -47,6 +48,9 @@ Route::middleware('auth:sanctum')->group(function () {
     */
     Route::get('/santri', [SantriController::class, 'index']);
 
+    // Scan QR santri (semua role yang login bisa scan untuk lihat status)
+    Route::get('/perpulangan/scan/{nis}', [PerpulanganController::class, 'scan']);
+
 
     /*
     |--------------------------------------------------------------------------
@@ -70,6 +74,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/izin/kembali', [IzinController::class, 'kembali']);
         Route::get('/izin/rekap', [IzinController::class, 'rekap']);
         Route::patch('/izin/status', [IzinController::class, 'updateStatus']);
+
+        // Perpulangan
+        Route::get('/perpulangan/rekap', [PerpulanganController::class, 'rekap']);
+        Route::post('/perpulangan/approve/musrif', [PerpulanganController::class, 'approveMusrif']);
+        Route::post('/perpulangan/approve/keamanan', [PerpulanganController::class, 'approveKeamanan']);
+        Route::post('/perpulangan/kembali', [PerpulanganController::class, 'kembali']);
     });
 
 
@@ -78,10 +88,14 @@ Route::middleware('auth:sanctum')->group(function () {
     | ROLE: SUPERADMIN ONLY (SPP)
     |--------------------------------------------------------------------------
     */
-    Route::middleware('role:superadmin')->prefix('spp')->group(function () {
-        Route::get('/tagihan', [SppController::class, 'tagihan']);
-        Route::post('/bayar', [SppController::class, 'bayar']);
-        Route::get('/riwayat', [SppController::class, 'riwayat']);
+    Route::middleware('role:superadmin')->group(function () {
+        Route::post('/perpulangan/approve/spp', [PerpulanganController::class, 'approveSpp']);
+
+        Route::prefix('spp')->group(function () {
+            Route::get('/tagihan', [SppController::class, 'tagihan']);
+            Route::post('/bayar', [SppController::class, 'bayar']);
+            Route::get('/riwayat', [SppController::class, 'riwayat']);
+        });
     });
 
 });

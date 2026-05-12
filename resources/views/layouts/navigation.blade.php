@@ -286,11 +286,71 @@
                         </div>
                     </div>
 
+                    {{-- Dropdown: Izin Pulang --}}
+                    <div class="nav-dropdown-wrap" x-data="{ pulangOpen: false }" @click.outside="pulangOpen = false" style="position:relative;">
+                        <button @click="pulangOpen = !pulangOpen"
+                            class="nav-pill {{ request()->routeIs('izin-pulang.*') ? 'active' : '' }}"
+                            :class="{ 'active': pulangOpen }">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+                            Izin Pulang
+                            <svg class="chevron" :style="pulangOpen ? 'transform:rotate(180deg)' : ''" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                        </button>
+                        <div x-show="pulangOpen" class="nav-dropdown" style="display:none;left:0;right:auto;min-width:180px;">
+                            <div style="padding:4px 0;">
+                                <a href="{{ route('izin-pulang.index') }}" class="{{ request()->routeIs('izin-pulang.index') ? 'active-item' : '' }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                                    Input Izin Pulang
+                                </a>
+                                <a href="{{ route('izin-pulang.rekap') }}" class="{{ request()->routeIs('izin-pulang.rekap') ? 'active-item' : '' }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                    Rekap Izin Pulang
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Dropdown: Perpulangan (guru + superadmin) --}}
+                    <div class="nav-dropdown-wrap" x-data="{ perpulanganOpen: false }" @click.outside="perpulanganOpen = false" style="position:relative;">
+                        <button @click="perpulanganOpen = !perpulanganOpen"
+                            class="nav-pill {{ request()->routeIs('perpulangan.scan.*') || request()->routeIs('admin.perpulangan.*') ? 'active' : '' }}"
+                            :class="{ 'active': perpulanganOpen }">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25"/></svg>
+                            Perpulangan
+                            <svg class="chevron" :style="perpulanganOpen ? 'transform:rotate(180deg)' : ''" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                        </button>
+                        <div x-show="perpulanganOpen" class="nav-dropdown" style="display:none;left:0;right:auto;min-width:190px;">
+                            <div style="padding:4px 0;">
+                                <a href="{{ route('perpulangan.scan.musrif') }}" class="{{ request()->routeIs('perpulangan.scan.musrif') ? 'active-item' : '' }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    TTD Musrif
+                                </a>
+                                @if(Auth::user()->isSuperAdmin())
+                                <a href="{{ route('perpulangan.scan.spp') }}" class="{{ request()->routeIs('perpulangan.scan.spp') ? 'active-item' : '' }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                                    TTD SPP
+                                </a>
+                                @endif
+                                <a href="{{ route('perpulangan.scan.keamanan') }}" class="{{ request()->routeIs('perpulangan.scan.keamanan') ? 'active-item' : '' }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                    Keamanan
+                                </a>
+                                <a href="{{ route('perpulangan.scan.kembali') }}" class="{{ request()->routeIs('perpulangan.scan.kembali') ? 'active-item' : '' }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+                                    Kembali
+                                </a>
+                                <a href="{{ route('admin.perpulangan.rekap') }}" class="{{ request()->routeIs('admin.perpulangan.rekap') ? 'active-item' : '' }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                    Rekap
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                     {{-- Dropdown: Admin (superadmin only) --}}
                     @if(Auth::user()->isSuperAdmin())
                     <div class="nav-dropdown-wrap" x-data="{ adminOpen: false }" @click.outside="adminOpen = false" style="position:relative;">
                         <button @click="adminOpen = !adminOpen"
-                            class="nav-pill admin-pill {{ request()->routeIs('jadwal.*') || request()->routeIs('spp.*') || request()->routeIs('admin.users.*') || request()->routeIs('admin.santri.*') || request()->routeIs('admin.tahun-ajaran.*') || request()->routeIs('admin.santri.kelola-kelas') ? 'active' : '' }}"
+                            class="nav-pill admin-pill {{ request()->routeIs('jadwal.*') || request()->routeIs('spp.*') || request()->routeIs('admin.users.*') || request()->routeIs('admin.santri.*') || request()->routeIs('admin.tahun-ajaran.*') || request()->routeIs('admin.santri.kelola-kelas') || request()->routeIs('admin.perpulangan.*') ? 'active' : '' }}"
                             :class="{ 'active': adminOpen }">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                             Admin
@@ -324,6 +384,10 @@
                                 <a href="{{ route('admin.tahun-ajaran.index') }}" class="{{ request()->routeIs('admin.tahun-ajaran.*') ? 'active-item' : '' }}">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                                     Tahun Ajaran
+                                </a>
+                                <a href="{{ route('admin.perpulangan.index') }}" class="{{ request()->routeIs('admin.perpulangan.*') ? 'active-item' : '' }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25"/></svg>
+                                    Perpulangan
                                 </a>
                             </div>
                         </div>
@@ -411,6 +475,44 @@
                 Rekap Izin Keluar
             </a>
 
+            {{-- Izin Pulang Section --}}
+            <div style="height:1px;background:rgba(255,255,255,0.06);margin:4px 20px;"></div>
+            <div style="padding:6px 20px 4px;font-size:0.65rem;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;">Izin Pulang</div>
+            <a href="{{ route('izin-pulang.index') }}" class="mobile-pill mobile-sub {{ request()->routeIs('izin-pulang.index') ? 'active' : '' }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Input Izin Pulang
+            </a>
+            <a href="{{ route('izin-pulang.rekap') }}" class="mobile-pill mobile-sub {{ request()->routeIs('izin-pulang.rekap') ? 'active' : '' }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Rekap Izin Pulang
+            </a>
+
+            {{-- Perpulangan Section --}}
+            <div style="height:1px;background:rgba(255,255,255,0.06);margin:4px 20px;"></div>
+            <div style="padding:6px 20px 4px;font-size:0.65rem;color:#34d399;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;">Perpulangan</div>
+            <a href="{{ route('perpulangan.scan.musrif') }}" class="mobile-pill mobile-sub {{ request()->routeIs('perpulangan.scan.musrif') ? 'active' : '' }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                TTD Musrif
+            </a>
+            @if(Auth::user()->isSuperAdmin())
+            <a href="{{ route('perpulangan.scan.spp') }}" class="mobile-pill mobile-sub {{ request()->routeIs('perpulangan.scan.spp') ? 'active' : '' }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                TTD SPP
+            </a>
+            @endif
+            <a href="{{ route('perpulangan.scan.keamanan') }}" class="mobile-pill mobile-sub {{ request()->routeIs('perpulangan.scan.keamanan') ? 'active' : '' }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Keamanan
+            </a>
+            <a href="{{ route('perpulangan.scan.kembali') }}" class="mobile-pill mobile-sub {{ request()->routeIs('perpulangan.scan.kembali') ? 'active' : '' }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+                Kembali
+            </a>
+            <a href="{{ route('admin.perpulangan.rekap') }}" class="mobile-pill mobile-sub {{ request()->routeIs('admin.perpulangan.rekap') ? 'active' : '' }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Rekap
+            </a>
+
             {{-- Admin Section (superadmin only) --}}
             @if(Auth::user()->isSuperAdmin())
                 <div style="height:1px;background:rgba(167,139,250,0.2);margin:4px 20px;"></div>
@@ -438,6 +540,10 @@
                 <a href="{{ route('admin.tahun-ajaran.index') }}" class="mobile-pill mobile-sub {{ request()->routeIs('admin.tahun-ajaran.*') ? 'active' : '' }}">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                     Tahun Ajaran
+                </a>
+                <a href="{{ route('admin.perpulangan.index') }}" class="mobile-pill mobile-sub {{ request()->routeIs('admin.perpulangan.*') ? 'active' : '' }}">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25"/></svg>
+                    Perpulangan
                 </a>
             @endif
         </div>

@@ -13,6 +13,7 @@ class Santri extends Model
 
     public function absensi()    { return $this->hasMany(Absensi::class, 'nis', 'nis'); }
     public function izin()       { return $this->hasMany(Izin::class, 'nis', 'nis'); }
+    public function izinPulang() { return $this->hasMany(IzinPulang::class, 'nis', 'nis'); }
     public function sppTagihan() { return $this->hasMany(SppTagihan::class, 'nis', 'nis'); }
     public function riwayatKelas() { return $this->hasMany(RiwayatKelas::class, 'nis', 'nis')->orderBy('created_at', 'desc'); }
 

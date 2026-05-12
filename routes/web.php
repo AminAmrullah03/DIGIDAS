@@ -4,10 +4,13 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\SppController;
 use App\Http\Controllers\IzinController;
+use App\Http\Controllers\IzinPulangController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SantriController;
 use App\Http\Controllers\Admin\TahunAjaranController;
 use App\Http\Controllers\Admin\JadwalAbsenController;
+use App\Http\Controllers\Admin\PerpulanganController;
+use App\Http\Controllers\Api\PerpulanganController as ApiPerpulanganController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Santri;
 
@@ -49,10 +52,34 @@ Route::middleware(['auth', 'role:superadmin,guru'])->group(function () {
         Route::post('/update-status', [IzinController::class, 'updateStatus'])->name('updateStatus');
     });
 
+    // Izin Pulang
+    Route::prefix('izin-pulang')->as('izin-pulang.')->group(function () {
+        Route::get('/', [IzinPulangController::class, 'index'])->name('index');
+        Route::get('/santri', [IzinPulangController::class, 'getSantri'])->name('santri');
+        Route::post('/store', [IzinPulangController::class, 'store'])->name('store');
+        Route::get('/rekap', [IzinPulangController::class, 'rekap'])->name('rekap');
+        Route::post('/{izinPulang}/kembali', [IzinPulangController::class, 'kembali'])->name('kembali');
+    });
+
     // Profile (semua role bisa edit profil sendiri)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Perpulangan — Halaman Scan (guru + superadmin)
+    Route::prefix('perpulangan/scan')->as('perpulangan.scan.')->group(function () {
+        Route::get('/musrif',   fn() => view('perpulangan.scanmusrif'))  ->name('musrif');
+        Route::get('/keamanan', fn() => view('perpulangan.scankeamanan'))->name('keamanan');
+        Route::get('/kembali',  fn() => view('perpulangan.scankembali')) ->name('kembali');
+    });
+
+    // Endpoint JSON untuk halaman web scan. Endpoint /api tetap khusus Bearer token.
+    Route::prefix('perpulangan/ajax')->group(function () {
+        Route::get('/scan/{nis}', [ApiPerpulanganController::class, 'scan']);
+        Route::post('/approve/musrif', [ApiPerpulanganController::class, 'approveMusrif']);
+        Route::post('/approve/keamanan', [ApiPerpulanganController::class, 'approveKeamanan']);
+        Route::post('/kembali', [ApiPerpulanganController::class, 'kembali']);
+    });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -121,6 +148,21 @@ Route::middleware(['auth', 'role:superadmin'])->group(function () {
 
     // Import lama dipindah ke SantriController::import
 
+    // Perpulangan (event perpulangan massal santri)
+    Route::prefix('admin/perpulangan')->as('admin.perpulangan.')->group(function () {
+        Route::get('/',        [PerpulanganController::class, 'index'])->name('index');
+        Route::get('/create',  [PerpulanganController::class, 'create'])->name('create');
+        Route::get('/rekap',   [PerpulanganController::class, 'rekap'])->name('rekap');
+        Route::post('/',       [PerpulanganController::class, 'store'])->name('store');
+        Route::patch('/{perpulangan}/selesai', [PerpulanganController::class, 'selesai'])->name('selesai');
+        Route::delete('/{perpulangan}',        [PerpulanganController::class, 'destroy'])->name('destroy');
+    });
+
+    // Scan SPP — superadmin only
+    Route::get('/perpulangan/scan/spp', fn() => view('perpulangan.scanspp'))
+        ->name('perpulangan.scan.spp');
+
+    Route::post('/perpulangan/ajax/approve/spp', [ApiPerpulanganController::class, 'approveSpp']);
 });
 
 require __DIR__.'/auth.php';

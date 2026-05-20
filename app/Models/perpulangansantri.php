@@ -17,21 +17,17 @@ class PerpulanganSantri extends Model
     ];
 
     protected $casts = [
-        'keluar_at'  => 'datetime',
+        'keluar_at' => 'datetime',
         'kembali_at' => 'datetime',
     ];
 
-    // ─── Status Constants ─────────────────────────────────────────────────────
-
-    const STATUS_MENUNGGU  = 'menunggu';
-    const STATUS_SEBAGIAN  = 'sebagian';
-    const STATUS_DIIZINKAN = 'diizinkan';
-    const STATUS_KELUAR    = 'keluar';
-    const STATUS_KEMBALI   = 'kembali';
-    const STATUS_KABUR     = 'kabur';
-    const STATUS_TERLAMBAT_KEMBALI = 'terlambat_kembali';
-
-    // ─── Relasi ───────────────────────────────────────────────────────────────
+    public const STATUS_MENUNGGU = 'menunggu';
+    public const STATUS_SEBAGIAN = 'sebagian';
+    public const STATUS_DIIZINKAN = 'diizinkan';
+    public const STATUS_KELUAR = 'keluar';
+    public const STATUS_KEMBALI = 'kembali';
+    public const STATUS_KABUR = 'kabur';
+    public const STATUS_TERLAMBAT_KEMBALI = 'terlambat_kembali';
 
     public function perpulangan()
     {
@@ -47,8 +43,6 @@ class PerpulanganSantri extends Model
     {
         return $this->hasMany(PerpulanganApproval::class, 'perpulangan_santri_id');
     }
-
-    // ─── Helpers Cek Approval ─────────────────────────────────────────────────
 
     public function hasApproval(string $type): bool
     {
@@ -70,29 +64,19 @@ class PerpulanganSantri extends Model
         return $this->hasApproval('keamanan');
     }
 
-    /**
-     * Apakah santri sudah boleh diapprove keamanan
-     * (syarat: musrif + spp sudah approve)
-     */
     public function bolehKeluar(): bool
     {
         return $this->hasMusrif() && $this->hasSpp();
     }
 
-    // ─── Update Status Otomatis ───────────────────────────────────────────────
-
-    /**
-     * Hitung ulang status berdasarkan approval yang ada,
-     * lalu simpan ke DB.
-     */
     public function recalculateStatus(): void
     {
         if (in_array($this->status, [self::STATUS_KABUR, self::STATUS_KEMBALI, self::STATUS_TERLAMBAT_KEMBALI], true)) {
             return;
         }
 
-        $hasMusrif   = $this->hasMusrif();
-        $hasSpp      = $this->hasSpp();
+        $hasMusrif = $this->hasMusrif();
+        $hasSpp = $this->hasSpp();
         $hasKeamanan = $this->hasKeamanan();
 
         if ($this->kembali_at !== null) {
@@ -110,33 +94,31 @@ class PerpulanganSantri extends Model
         $this->update(['status' => $status]);
     }
 
-    // ─── Accessors ────────────────────────────────────────────────────────────
-
     public function getStatusLabelAttribute(): string
     {
         return match ($this->status) {
-            self::STATUS_MENUNGGU  => 'Menunggu',
-            self::STATUS_SEBAGIAN  => 'Sebagian',
+            self::STATUS_MENUNGGU => 'Menunggu',
+            self::STATUS_SEBAGIAN => 'Sebagian',
             self::STATUS_DIIZINKAN => 'Diizinkan',
-            self::STATUS_KELUAR    => 'Keluar',
-            self::STATUS_KEMBALI   => 'Kembali',
-            self::STATUS_KABUR     => 'Kabur',
+            self::STATUS_KELUAR => 'Keluar',
+            self::STATUS_KEMBALI => 'Kembali',
+            self::STATUS_KABUR => 'Kabur',
             self::STATUS_TERLAMBAT_KEMBALI => 'Terlambat Kembali',
-            default                => ucfirst($this->status),
+            default => ucfirst($this->status),
         };
     }
 
     public function getStatusBadgeAttribute(): string
     {
         return match ($this->status) {
-            self::STATUS_MENUNGGU  => 'bg-gray-100 text-gray-600',
-            self::STATUS_SEBAGIAN  => 'bg-yellow-100 text-yellow-800',
+            self::STATUS_MENUNGGU => 'bg-gray-100 text-gray-600',
+            self::STATUS_SEBAGIAN => 'bg-yellow-100 text-yellow-800',
             self::STATUS_DIIZINKAN => 'bg-blue-100 text-blue-800',
-            self::STATUS_KELUAR    => 'bg-orange-100 text-orange-800',
-            self::STATUS_KEMBALI   => 'bg-green-100 text-green-800',
-            self::STATUS_KABUR     => 'bg-red-100 text-red-800',
+            self::STATUS_KELUAR => 'bg-orange-100 text-orange-800',
+            self::STATUS_KEMBALI => 'bg-green-100 text-green-800',
+            self::STATUS_KABUR => 'bg-red-100 text-red-800',
             self::STATUS_TERLAMBAT_KEMBALI => 'bg-rose-100 text-rose-800',
-            default                => 'bg-gray-100 text-gray-600',
+            default => 'bg-gray-100 text-gray-600',
         };
     }
 }

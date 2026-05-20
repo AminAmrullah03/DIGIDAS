@@ -20,8 +20,6 @@ class PerpulanganApproval extends Model
         'approved_at' => 'datetime',
     ];
 
-    // ─── Relasi ───────────────────────────────────────────────────────────────
-
     public function perpulanganSantri()
     {
         return $this->belongsTo(PerpulanganSantri::class, 'perpulangan_santri_id');

@@ -200,8 +200,13 @@ function renderCard(d) {
                     + chipHtml('Keamanan', d.approvals.keamanan);
 
     const sudahMusrif = !!d.approvals.musrif;
-    document.getElementById('already-notice').style.display = sudahMusrif ? 'block' : 'none';
-    document.getElementById('form-section').style.display   = sudahMusrif ? 'none'  : 'block';
+    const approvalClosed = !d.approval_open;
+    const notice = document.getElementById('already-notice');
+    notice.textContent = approvalClosed
+        ? `Approval hanya dibuka pada tanggal ${d.event.tanggal_mulai}.`
+        : '✅ Santri ini sudah mendapat TTD musrif.';
+    notice.style.display = (sudahMusrif || approvalClosed) ? 'block' : 'none';
+    document.getElementById('form-section').style.display   = (sudahMusrif || approvalClosed) ? 'none'  : 'block';
     document.getElementById('santri-result').style.display  = 'block';
     document.getElementById('santri-result').scrollIntoView({behavior:'smooth',block:'nearest'});
 }

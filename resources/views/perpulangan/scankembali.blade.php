@@ -171,6 +171,7 @@ function renderCard(d) {
     const infoBox = document.getElementById('info-box');
     const btnK    = document.getElementById('btn-kembali');
     const initial = d.nama.charAt(0).toUpperCase();
+    const batas   = d.event.batas_kembali;
 
     // Chips
     const chips = document.getElementById('chips-container');
@@ -179,42 +180,36 @@ function renderCard(d) {
                     + chipHtml('Keamanan', d.approvals.keamanan)
                     + (d.kembali_at ? `<span class="chip chip-done">🏠 Kembali: ${d.kembali_at}</span>` : '<span class="chip chip-wait">🏠 Belum Kembali</span>');
 
-    if(d.status === 'kembali') {
+    if(d.status === 'kembali' || (d.status === 'terlambat_kembali' && d.kembali_at)) {
         // Sudah kembali
         profile.className='profile profile-kembali';
         avatar.className='avatar av-green'; avatar.textContent='🏠';
         infoBox.className='info-box info-kembali';
-        infoBox.innerHTML=`<div class="info-title" style="color:#166534;">✅ Sudah Kembali</div>
+        infoBox.innerHTML=`<div class="info-title" style="color:#166534;">✅ ${d.status === 'terlambat_kembali' ? 'Terlambat Kembali' : 'Sudah Kembali'}</div>
             <div class="info-sub">Santri telah kembali ke pondok pada ${d.kembali_at||'-'}</div>`;
         btnK.className='btn btn-disabled'; btnK.textContent='🏠 Sudah Kembali'; btnK.disabled=true;
 
-    } else if(d.status === 'keluar') {
-        // Sedang di luar — siap dicatat kembali
+    } else if(d.can_scan_kembali) {
+        // Hari kembali sudah dibuka, tidak wajib pernah scan keluar.
         profile.className='profile profile-keluar';
         avatar.className='avatar av-orange'; avatar.textContent=initial;
 
-        // Cek apakah terlambat (batas kembali event)
-        const batas = d.event.batas_kembali;
-        const now   = new Date();
-        const batasDate = new Date(batas.split('/').reverse().join('-'));
-        const terlambat = now > batasDate;
-
         infoBox.className='info-box info-keluar';
-        infoBox.innerHTML=`<div class="info-title" style="color:#92400e;">🚶 Sedang di Luar</div>
-            <div class="info-sub">Keluar pada: ${d.keluar_at||'-'}</div>
+        infoBox.innerHTML=`<div class="info-title" style="color:#92400e;">${d.kembali_late ? '⚠️ Terlambat Kembali' : '🏠 Siap Dicatat Kembali'}</div>
+            <div class="info-sub">Status terakhir: ${d.status_label}</div>
             <div class="info-sub">Batas kembali: ${batas}
-                ${terlambat ? '<span class="late-badge">⚠️ TERLAMBAT</span>' : ''}
+                ${d.kembali_late ? '<span class="late-badge">⚠️ TERLAMBAT</span>' : ''}
             </div>`;
         btnK.className='btn btn-kembali'; btnK.textContent='🏠 Catat Kembali'; btnK.disabled=false;
 
     } else {
-        // Belum keluar — tidak bisa dicatat kembali
+        // Belum masuk hari kembali.
         profile.className='profile profile-bad';
         avatar.className='avatar av-red'; avatar.textContent='✕';
         infoBox.className='info-box info-bad';
-        infoBox.innerHTML=`<div class="info-title" style="color:#991b1b;">🚫 Belum Keluar</div>
-            <div class="info-sub">Santri belum melewati checkpoint keamanan. Tidak bisa dicatat kembali.</div>`;
-        btnK.className='btn btn-disabled'; btnK.textContent='🚫 Belum Keluar'; btnK.disabled=true;
+        infoBox.innerHTML=`<div class="info-title" style="color:#991b1b;">🚫 Belum Hari Kembali</div>
+            <div class="info-sub">Scan kembali mulai dibuka pada ${d.event.batas_kembali}.</div>`;
+        btnK.className='btn btn-disabled'; btnK.textContent='🚫 Belum Dibuka'; btnK.disabled=true;
     }
 
     document.getElementById('santri-result').style.display='block';

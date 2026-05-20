@@ -28,6 +28,8 @@ class PerpulanganSantri extends Model
     const STATUS_DIIZINKAN = 'diizinkan';
     const STATUS_KELUAR    = 'keluar';
     const STATUS_KEMBALI   = 'kembali';
+    const STATUS_KABUR     = 'kabur';
+    const STATUS_TERLAMBAT_KEMBALI = 'terlambat_kembali';
 
     // ─── Relasi ───────────────────────────────────────────────────────────────
 
@@ -85,6 +87,10 @@ class PerpulanganSantri extends Model
      */
     public function recalculateStatus(): void
     {
+        if (in_array($this->status, [self::STATUS_KABUR, self::STATUS_KEMBALI, self::STATUS_TERLAMBAT_KEMBALI], true)) {
+            return;
+        }
+
         $hasMusrif   = $this->hasMusrif();
         $hasSpp      = $this->hasSpp();
         $hasKeamanan = $this->hasKeamanan();
@@ -114,6 +120,8 @@ class PerpulanganSantri extends Model
             self::STATUS_DIIZINKAN => 'Diizinkan',
             self::STATUS_KELUAR    => 'Keluar',
             self::STATUS_KEMBALI   => 'Kembali',
+            self::STATUS_KABUR     => 'Kabur',
+            self::STATUS_TERLAMBAT_KEMBALI => 'Terlambat Kembali',
             default                => ucfirst($this->status),
         };
     }
@@ -126,6 +134,8 @@ class PerpulanganSantri extends Model
             self::STATUS_DIIZINKAN => 'bg-blue-100 text-blue-800',
             self::STATUS_KELUAR    => 'bg-orange-100 text-orange-800',
             self::STATUS_KEMBALI   => 'bg-green-100 text-green-800',
+            self::STATUS_KABUR     => 'bg-red-100 text-red-800',
+            self::STATUS_TERLAMBAT_KEMBALI => 'bg-rose-100 text-rose-800',
             default                => 'bg-gray-100 text-gray-600',
         };
     }

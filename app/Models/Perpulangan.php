@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class Perpulangan extends Model
 {
@@ -61,10 +62,113 @@ class Perpulangan extends Model
             'updated_at'     => now(),
         ])->toArray();
 
-        // insertOrIgnore agar aman jika dipanggil dua kali
-        PerpulanganSantri::insertOrIgnore($rows);
+        if (empty($rows)) {
+            return 0;
+        }
 
-        return count($rows);
+        // insertOrIgnore agar aman jika dipanggil dua kali
+        return PerpulanganSantri::insertOrIgnore($rows);
+    }
+
+    public function approvalStartsAt(): Carbon
+    {
+        return $this->tanggal_mulai->copy()->startOfDay();
+    }
+
+    public function approvalEndsAt(): Carbon
+    {
+        return $this->tanggal_mulai->copy()->endOfDay();
+    }
+
+    public function returnStartsAt(): Carbon
+    {
+        return $this->batas_kembali->copy()->startOfDay();
+    }
+
+    public function returnEndsAt(): Carbon
+    {
+        return $this->batas_kembali->copy()->endOfDay();
+    }
+
+    public function isApprovalDay(?Carbon $time = null): bool
+    {
+        $time ??= now();
+
+        return $time->betweenIncluded($this->approvalStartsAt(), $this->approvalEndsAt());
+    }
+
+    public function isBeforeApprovalDay(?Carbon $time = null): bool
+    {
+        $time ??= now();
+
+        return $time->lt($this->approvalStartsAt());
+    }
+
+    public function isAfterApprovalDay(?Carbon $time = null): bool
+    {
+        $time ??= now();
+
+        return $time->gt($this->approvalEndsAt());
+    }
+
+    public function isReturnOpen(?Carbon $time = null): bool
+    {
+        $time ??= now();
+
+        return $time->greaterThanOrEqualTo($this->returnStartsAt());
+    }
+
+    public function isReturnDay(?Carbon $time = null): bool
+    {
+        $time ??= now();
+
+        return $time->betweenIncluded($this->returnStartsAt(), $this->returnEndsAt());
+    }
+
+    public function isBeforeReturnDay(?Carbon $time = null): bool
+    {
+        $time ??= now();
+
+        return $time->lt($this->returnStartsAt());
+    }
+
+    public function isLateReturn(?Carbon $time = null): bool
+    {
+        $time ??= now();
+
+        return $time->gt($this->returnEndsAt());
+    }
+
+    public function sinkronkanStatusOtomatis(?Carbon $time = null): array
+    {
+        $time ??= now();
+        $kabur = 0;
+        $terlambatKembali = 0;
+
+        if ($this->isAfterApprovalDay($time)) {
+            $kabur = $this->perpulanganSantri()
+                ->whereIn('status', [
+                    PerpulanganSantri::STATUS_MENUNGGU,
+                    PerpulanganSantri::STATUS_SEBAGIAN,
+                    PerpulanganSantri::STATUS_DIIZINKAN,
+                ])
+                ->update(['status' => PerpulanganSantri::STATUS_KABUR]);
+        }
+
+        if ($this->isLateReturn($time)) {
+            $terlambatKembali = $this->perpulanganSantri()
+                ->whereNull('kembali_at')
+                ->whereNotIn('status', [
+                    PerpulanganSantri::STATUS_KEMBALI,
+                    PerpulanganSantri::STATUS_TERLAMBAT_KEMBALI,
+                ])
+                ->update(['status' => PerpulanganSantri::STATUS_TERLAMBAT_KEMBALI]);
+        }
+
+        return [
+            'kabur' => $kabur,
+            'terlambat_kembali' => $terlambatKembali,
+        ];
     }
 
     // ─── Accessors ────────────────────────────────────────────────────────────

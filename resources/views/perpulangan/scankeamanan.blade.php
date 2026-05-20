@@ -167,7 +167,8 @@ function renderCard(d) {
     const hasSpp      = !!d.approvals.spp;
     const boleh       = d.boleh_keluar;
     const sudahKeluar = d.status === 'keluar';
-    const sudahKembali= d.status === 'kembali';
+    const sudahKembali= d.status === 'kembali' || (d.status === 'terlambat_kembali' && d.kembali_at);
+    const approvalClosed = !d.approval_open;
 
     // Profile colors
     const profile = document.getElementById('profile-section');
@@ -209,11 +210,16 @@ function renderCard(d) {
         verdict.innerHTML = `<div class="verdict-icon">🚶</div>
             <div class="verdict-title" style="color:#92400e;">Sudah Keluar</div>
             <div class="verdict-sub">Tercatat keluar pada ${d.keluar_at||'-'}</div>`;
-    } else if(boleh) {
+    } else if(boleh && !approvalClosed) {
         verdict.className = 'verdict verdict-ok';
         verdict.innerHTML = `<div class="verdict-icon">✅</div>
             <div class="verdict-title" style="color:#166534;">BOLEH KELUAR</div>
             <div class="verdict-sub">Semua TTD sudah lengkap</div>`;
+    } else if(approvalClosed) {
+        verdict.className = 'verdict verdict-bad';
+        verdict.innerHTML = `<div class="verdict-icon">🚫</div>
+            <div class="verdict-title" style="color:#991b1b;">DI LUAR JADWAL APPROVAL</div>
+            <div class="verdict-sub">Approval keamanan hanya dibuka pada ${d.event.tanggal_mulai}</div>`;
     } else {
         const missing = [];
         if(!hasMusrif) missing.push('TTD Musrif');
@@ -230,10 +236,14 @@ function renderCard(d) {
         btnApprove.className = 'btn btn-approve-bad';
         btnApprove.textContent = sudahKembali ? '🏠 Sudah Kembali' : '🚶 Sudah Keluar';
         btnApprove.disabled = true;
-    } else if(boleh) {
+    } else if(boleh && !approvalClosed) {
         btnApprove.className = 'btn btn-approve-ok';
         btnApprove.textContent = '🛡️ Izinkan Keluar';
         btnApprove.disabled = false;
+    } else if(approvalClosed) {
+        btnApprove.className = 'btn btn-approve-bad';
+        btnApprove.textContent = '🚫 Di Luar Jadwal';
+        btnApprove.disabled = true;
     } else {
         btnApprove.className = 'btn btn-approve-bad';
         btnApprove.textContent = '🚫 Tidak Dapat Keluar';

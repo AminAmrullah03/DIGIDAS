@@ -38,9 +38,14 @@ class PerpulanganController extends Controller
             'kembali_at'    => optional($ps->kembali_at)->format('d/m/Y H:i'),
             'approvals'     => $approvals,
             'boleh_keluar'  => $ps->bolehKeluar(),
+            'approval_open' => $ps->perpulangan->isApprovalDay(),
+            'kembali_open'  => $ps->perpulangan->isReturnDay(),
+            'can_scan_kembali' => $ps->perpulangan->isReturnOpen(),
+            'kembali_late'  => $ps->perpulangan->isLateReturn(),
             'event'         => [
                 'id'            => $ps->perpulangan->id,
                 'nama_event'    => $ps->perpulangan->nama_event,
+                'tanggal_mulai' => $ps->perpulangan->tanggal_mulai->format('d/m/Y'),
                 'batas_kembali' => $ps->perpulangan->batas_kembali->format('d/m/Y'),
             ],
         ];
@@ -54,6 +59,7 @@ class PerpulanganController extends Controller
 
     public function scan(string $nis)
     {
+        $nis = trim($nis);
         $santri = Santri::where('nis', $nis)->where('status', 'aktif')->first();
 
         if (! $santri) {
@@ -67,9 +73,9 @@ class PerpulanganController extends Controller
             return ApiResponse::error('Tidak ada event perpulangan aktif saat ini.', 404);
         }
 
-        $ps = PerpulanganSantri::where('perpulangan_id', $event->id)
-            ->where('nis', $nis)
-            ->first();
+        $event->sinkronkanStatusOtomatis();
+
+        $ps = $this->findOrRegisterPerpulanganSantri($event, $santri->nis);
 
         if (! $ps) {
             return ApiResponse::error('Santri tidak terdaftar dalam event perpulangan ini.', 404);
@@ -91,6 +97,12 @@ class PerpulanganController extends Controller
 
         $ps = $this->getActivePerpulanganSantri($request->nis);
         if ($ps instanceof \Illuminate\Http\JsonResponse) return $ps;
+
+        $approvalGuard = $this->ensureApprovalOpen($ps);
+        if ($approvalGuard) return $approvalGuard;
+
+        $statusGuard = $this->ensureCanReceiveApproval($ps);
+        if ($statusGuard) return $statusGuard;
 
         if ($ps->hasMusrif()) {
             return ApiResponse::error('Santri ini sudah mendapat TTD musrif.', 422);
@@ -131,6 +143,12 @@ class PerpulanganController extends Controller
         $ps = $this->getActivePerpulanganSantri($request->nis);
         if ($ps instanceof \Illuminate\Http\JsonResponse) return $ps;
 
+        $approvalGuard = $this->ensureApprovalOpen($ps);
+        if ($approvalGuard) return $approvalGuard;
+
+        $statusGuard = $this->ensureCanReceiveApproval($ps);
+        if ($statusGuard) return $statusGuard;
+
         if ($ps->hasSpp()) {
             return ApiResponse::error('Santri ini sudah mendapat TTD SPP/kantor.', 422);
         }
@@ -167,13 +185,19 @@ class PerpulanganController extends Controller
         $ps = $this->getActivePerpulanganSantri($request->nis);
         if ($ps instanceof \Illuminate\Http\JsonResponse) return $ps;
 
+        $approvalGuard = $this->ensureApprovalOpen($ps);
+        if ($approvalGuard) return $approvalGuard;
+
+        $statusGuard = $this->ensureCanReceiveApproval($ps);
+        if ($statusGuard) return $statusGuard;
+
         // Cek santri belum keluar
         if ($ps->status === PerpulanganSantri::STATUS_KELUAR) {
             return ApiResponse::error('Santri ini sudah tercatat keluar.', 422);
         }
 
-        if ($ps->status === PerpulanganSantri::STATUS_KEMBALI) {
-            return ApiResponse::error('Santri ini sudah kembali ke pondok.', 422);
+        if ($ps->hasKeamanan()) {
+            return ApiResponse::error('Santri ini sudah mendapat approval keamanan.', 422);
         }
 
         // VALIDASI UTAMA: harus punya TTD musrif dan spp
@@ -218,17 +242,18 @@ class PerpulanganController extends Controller
         $ps = $this->getActivePerpulanganSantri($request->nis);
         if ($ps instanceof \Illuminate\Http\JsonResponse) return $ps;
 
-        if ($ps->status === PerpulanganSantri::STATUS_KEMBALI) {
+        if ($ps->status === PerpulanganSantri::STATUS_KEMBALI || ($ps->status === PerpulanganSantri::STATUS_TERLAMBAT_KEMBALI && $ps->kembali_at)) {
             return ApiResponse::error('Santri ini sudah tercatat kembali.', 422);
         }
 
-        // Santri harus sudah keluar dulu (sudah dapat TTD keamanan)
-        if ($ps->status !== PerpulanganSantri::STATUS_KELUAR) {
-            return ApiResponse::error('Santri belum tercatat keluar. Tidak bisa diproses kembali.', 422);
+        if ($ps->perpulangan->isBeforeReturnDay()) {
+            return ApiResponse::error('Scan kembali belum dibuka. Scan kembali mulai tanggal '.$ps->perpulangan->batas_kembali->format('d/m/Y').'.', 422);
         }
 
         $ps->update([
-            'status'     => PerpulanganSantri::STATUS_KEMBALI,
+            'status'     => $ps->perpulangan->isLateReturn()
+                ? PerpulanganSantri::STATUS_TERLAMBAT_KEMBALI
+                : PerpulanganSantri::STATUS_KEMBALI,
             'kembali_at' => now(),
         ]);
 
@@ -258,6 +283,8 @@ class PerpulanganController extends Controller
             return ApiResponse::error('Event perpulangan tidak ditemukan.', 404);
         }
 
+        $event->sinkronkanStatusOtomatis();
+
         $query = PerpulanganSantri::with(['santri', 'approvals'])
             ->where('perpulangan_id', $event->id);
 
@@ -278,6 +305,8 @@ class PerpulanganController extends Controller
             'diizinkan' => $rows->where('status', 'diizinkan')->count(),
             'keluar'    => $rows->where('status', 'keluar')->count(),
             'kembali'   => $rows->where('status', 'kembali')->count(),
+            'kabur'     => $rows->where('status', 'kabur')->count(),
+            'terlambat_kembali' => $rows->where('status', 'terlambat_kembali')->count(),
         ];
 
         return ApiResponse::success([
@@ -301,20 +330,82 @@ class PerpulanganController extends Controller
      */
     private function getActivePerpulanganSantri(string $nis): PerpulanganSantri|\Illuminate\Http\JsonResponse
     {
+        $nis = trim($nis);
         $event = Perpulangan::aktif()->orderByDesc('tanggal_mulai')->first();
 
         if (! $event) {
             return ApiResponse::error('Tidak ada event perpulangan aktif saat ini.', 404);
         }
 
+        $event->sinkronkanStatusOtomatis();
+
+        $ps = $this->findOrRegisterPerpulanganSantri($event, $nis);
+
+        if (! $ps) {
+            return ApiResponse::error('Santri tidak ditemukan atau tidak aktif.', 404);
+        }
+
+        return $ps;
+    }
+
+    /**
+     * Ambil data santri event aktif. Jika santri aktif belum terdaftar
+     * di event, daftarkan otomatis agar event lama/tidak lengkap tetap bisa discan.
+     */
+    private function findOrRegisterPerpulanganSantri(Perpulangan $event, string $nis): ?PerpulanganSantri
+    {
+        $nis = trim($nis);
+
         $ps = PerpulanganSantri::where('perpulangan_id', $event->id)
             ->where('nis', $nis)
             ->first();
 
-        if (! $ps) {
-            return ApiResponse::error('Santri tidak terdaftar dalam event perpulangan aktif.', 404);
+        if ($ps) {
+            return $ps;
         }
 
-        return $ps;
+        $santri = Santri::where('nis', $nis)->where('status', 'aktif')->first();
+
+        if (! $santri) {
+            return null;
+        }
+
+        return PerpulanganSantri::firstOrCreate(
+            [
+                'perpulangan_id' => $event->id,
+                'nis'            => $santri->nis,
+            ],
+            [
+                'status'         => PerpulanganSantri::STATUS_MENUNGGU,
+            ]
+        );
+    }
+
+    private function ensureApprovalOpen(PerpulanganSantri $ps): ?\Illuminate\Http\JsonResponse
+    {
+        $event = $ps->perpulangan;
+
+        if ($event->isBeforeApprovalDay()) {
+            return ApiResponse::error('Approval perpulangan belum dibuka. Approval hanya dapat dilakukan pada tanggal '.$event->tanggal_mulai->format('d/m/Y').'.', 422);
+        }
+
+        if ($event->isAfterApprovalDay()) {
+            return ApiResponse::error('Approval perpulangan sudah ditutup. Santri yang tidak lengkap approval pada hari perpulangan otomatis ditandai kabur.', 422);
+        }
+
+        return null;
+    }
+
+    private function ensureCanReceiveApproval(PerpulanganSantri $ps): ?\Illuminate\Http\JsonResponse
+    {
+        if ($ps->status === PerpulanganSantri::STATUS_KABUR) {
+            return ApiResponse::error('Santri ini sudah ditandai kabur karena approval tidak lengkap sampai akhir hari perpulangan.', 422);
+        }
+
+        if (in_array($ps->status, [PerpulanganSantri::STATUS_KEMBALI, PerpulanganSantri::STATUS_TERLAMBAT_KEMBALI], true)) {
+            return ApiResponse::error('Santri ini sudah tercatat kembali, approval tidak bisa diubah.', 422);
+        }
+
+        return null;
     }
 }

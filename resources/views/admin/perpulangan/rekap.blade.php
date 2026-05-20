@@ -1,403 +1,327 @@
 <x-app-layout>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-* { font-family: 'Plus Jakarta Sans', sans-serif; }
-
-.page-bg { min-height:100vh; background:#f1f5f9; padding:28px 16px; }
-.dark .page-bg { background:#0f172a; }
-.page-wrap { max-width:1200px; margin:0 auto; }
-
-/* ── Banner ── */
-.page-banner {
-    background:linear-gradient(135deg,#1e1b4b 0%,#312e81 52%,#4c1d95 100%);
-    border-radius:20px; padding:24px 28px; margin-bottom:18px;
-    position:relative; overflow:hidden;
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+* { font-family:'Plus Jakarta Sans',sans-serif; }
+.page { min-height:100vh; background:#f4f7fb; padding:28px 16px; }
+.dark .page { background:#0f172a; }
+.wrap { max-width:1220px; margin:0 auto; }
+.hero {
+    display:flex; align-items:flex-start; justify-content:space-between; gap:18px;
+    padding:22px 24px; margin-bottom:16px; border:1px solid #dbe5f2;
+    border-radius:16px; background:#ffffff; box-shadow:0 10px 30px rgba(15,23,42,.06);
 }
-.page-banner::before {
-    content:''; position:absolute; top:-54px; right:-42px;
-    width:176px; height:176px; border-radius:50%;
-    background:rgba(167,139,250,0.14); pointer-events:none;
-}
-.page-banner::after {
-    content:''; position:absolute; bottom:-56px; left:28%;
-    width:142px; height:142px; border-radius:50%;
-    background:rgba(30,27,75,0.36); pointer-events:none;
-}
-.page-banner h1 { color:#fff; font-size:1.28rem; font-weight:700; margin:0 0 5px; position:relative; z-index:1; }
-.page-banner p  { color:#c4b5fd; font-size:0.82rem; margin:0; position:relative; z-index:1; }
-.banner-actions { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; position:relative; z-index:1; }
-
-/* ── Buttons ── */
-.btn-primary, .btn-white, .btn-soft, .btn-action, .btn-danger, .btn-success {
+.dark .hero, .dark .panel, .dark .table-card { background:#1e293b; border-color:#334155; }
+.hero h1 { margin:0; color:#0f172a; font-size:1.35rem; font-weight:800; letter-spacing:0; }
+.dark .hero h1, .dark .section-title, .dark .name { color:#f8fafc; }
+.hero p { margin:6px 0 0; color:#64748b; font-size:.84rem; max-width:680px; }
+.hero-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.btn {
     display:inline-flex; align-items:center; justify-content:center; gap:7px;
-    border-radius:10px; font-size:0.8rem; font-weight:700;
-    text-decoration:none; border:none; cursor:pointer; transition:all 0.16s;
+    min-height:38px; padding:8px 13px; border-radius:8px; border:1px solid transparent;
+    font-size:.8rem; font-weight:800; text-decoration:none; cursor:pointer; transition:.15s;
 }
-.btn-primary { padding:9px 17px; background:#fff; color:#4c1d95; box-shadow:0 2px 10px rgba(0,0,0,0.13); }
-.btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,0,0,0.16); }
-.btn-white  { padding:8px 15px; color:#fff; background:rgba(255,255,255,0.14); border:1px solid rgba(255,255,255,0.24); }
-.btn-white:hover { background:rgba(255,255,255,0.23); }
-.btn-soft   { padding:8px 12px; color:#475569; background:#f8fafc; border:1px solid #e2e8f0; }
-.btn-soft:hover { color:#4c1d95; border-color:#ddd6fe; background:#f5f3ff; }
-.btn-action { padding:8px 12px; color:#0369a1; background:#eff6ff; border:1px solid #bfdbfe; }
-.btn-danger { padding:8px 12px; color:#be123c; background:#fff1f2; border:1px solid #fecdd3; }
-.btn-success { padding:8px 12px; color:#166534; background:#dcfce7; border:1px solid #86efac; }
-
-/* ── Alert ── */
-.alert { display:flex; align-items:flex-start; gap:10px; padding:12px 15px; border-radius:12px; font-size:0.83rem; font-weight:600; margin-bottom:14px; }
-.alert-success { background:#dcfce7; color:#166534; border:1px solid #86efac; }
-.alert-error   { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
-
-/* ── Stats ── */
-.stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:16px; }
-.stat-card {
-    background:#fff; border:1px solid #e2e8f0; border-radius:14px;
-    padding:15px 16px; box-shadow:0 1px 4px rgba(15,23,42,0.05);
+.btn-primary { color:#fff; background:#0f766e; border-color:#0f766e; }
+.btn-primary:hover { background:#115e59; }
+.btn-soft { color:#334155; background:#f8fafc; border-color:#dbe5f2; }
+.btn-soft:hover { color:#0f766e; border-color:#99f6e4; background:#f0fdfa; }
+.btn-info { color:#075985; background:#eff6ff; border-color:#bfdbfe; }
+.alert { display:flex; gap:10px; padding:12px 14px; margin-bottom:14px; border-radius:10px; font-size:.84rem; font-weight:700; }
+.alert-success { color:#166534; background:#dcfce7; border:1px solid #86efac; }
+.alert-error { color:#991b1b; background:#fee2e2; border:1px solid #fca5a5; }
+.stats { display:grid; grid-template-columns:repeat(8,minmax(110px,1fr)); gap:10px; margin-bottom:14px; }
+.stat { padding:14px; border:1px solid #dbe5f2; border-radius:12px; background:#fff; }
+.dark .stat { background:#1e293b; border-color:#334155; }
+.stat-label { margin:0 0 5px; color:#64748b; font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; }
+.stat-value { margin:0; color:#0f172a; font-size:1.35rem; font-weight:800; }
+.dark .stat-value { color:#f8fafc; }
+.panel {
+    margin-bottom:14px; padding:16px; border:1px solid #dbe5f2; border-radius:14px;
+    background:#fff; box-shadow:0 1px 4px rgba(15,23,42,.04);
 }
-.dark .stat-card { background:#1e293b; border-color:#334155; }
-.stat-label { margin:0 0 5px; font-size:0.67rem; color:#94a3b8; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; }
-.stat-value { margin:0; font-size:1.42rem; color:#0f172a; font-weight:800; }
-.dark .stat-value { color:#f1f5f9; }
-
-/* ── Filter card ── */
-.filter-card {
-    background:#fff; border:1px solid #e2e8f0; border-radius:16px;
-    padding:16px 18px; margin-bottom:16px; box-shadow:0 1px 4px rgba(15,23,42,0.05);
+.filter-grid { display:grid; grid-template-columns:1.4fr 1fr 1fr 1.2fr auto; gap:10px; align-items:end; }
+.label { display:block; margin-bottom:5px; color:#64748b; font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; }
+.input, .select {
+    width:100%; min-height:38px; padding:8px 11px; border:1.5px solid #dbe5f2; border-radius:8px;
+    color:#334155; background:#fff; font-size:.82rem; box-sizing:border-box;
 }
-.dark .filter-card { background:#1e293b; border-color:#334155; }
-.filter-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; align-items:end; }
-.filter-label { display:block; font-size:0.72rem; font-weight:700; color:#64748b; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.04em; }
-.filter-input, .filter-select {
-    width:100%; padding:9px 12px; border:1.5px solid #e2e8f0; border-radius:10px;
-    font-size:0.82rem; color:#334155; background:#fff; font-family:inherit;
-    transition:border-color 0.15s; box-sizing:border-box;
-}
-.filter-input:focus, .filter-select:focus {
-    outline:none; border-color:#a78bfa; box-shadow:0 0 0 3px rgba(167,139,250,0.12);
-}
-.dark .filter-input, .dark .filter-select { background:#0f172a; border-color:#334155; color:#cbd5e1; }
-
-/* ── Table card ── */
+.input:focus, .select:focus { outline:none; border-color:#14b8a6; box-shadow:0 0 0 3px rgba(20,184,166,.12); }
+.dark .input, .dark .select { background:#0f172a; border-color:#334155; color:#cbd5e1; }
 .table-card {
-    background:#fff; border:1px solid #e2e8f0; border-radius:16px;
-    overflow:hidden; box-shadow:0 1px 4px rgba(15,23,42,0.05);
+    border:1px solid #dbe5f2; border-radius:14px; background:#fff;
+    overflow:hidden; box-shadow:0 1px 4px rgba(15,23,42,.04);
 }
-.dark .table-card { background:#1e293b; border-color:#334155; }
 .table-head {
     display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding:15px 18px; border-bottom:1px solid #e2e8f0;
+    padding:15px 16px; border-bottom:1px solid #e2e8f0;
 }
 .dark .table-head { border-color:#334155; }
-.table-head h2 { margin:0; font-size:0.96rem; color:#0f172a; font-weight:800; }
-.dark .table-head h2 { color:#f8fafc; }
-.table-head p  { margin:3px 0 0; font-size:0.76rem; color:#94a3b8; }
-table { width:100%; border-collapse:collapse; font-size:0.79rem; }
+.section-title { margin:0; color:#0f172a; font-size:.98rem; font-weight:800; }
+.muted { margin:4px 0 0; color:#64748b; font-size:.78rem; }
+.event-pill { display:inline-flex; align-items:center; gap:7px; padding:7px 10px; border-radius:8px; background:#ecfeff; color:#0e7490; font-size:.78rem; font-weight:800; }
+table { width:100%; border-collapse:collapse; font-size:.8rem; }
 th {
-    padding:11px 14px; background:#f8fafc; color:#64748b; text-align:left;
-    font-size:0.67rem; font-weight:800; text-transform:uppercase; letter-spacing:0.045em;
-    border-bottom:1px solid #e2e8f0; white-space:nowrap;
+    padding:11px 14px; text-align:left; color:#64748b; background:#f8fafc;
+    border-bottom:1px solid #e2e8f0; font-size:.68rem; font-weight:800;
+    text-transform:uppercase; letter-spacing:.04em; white-space:nowrap;
 }
-td { padding:12px 14px; border-bottom:1px solid #f1f5f9; color:#334155; vertical-align:middle; }
+td { padding:12px 14px; border-bottom:1px solid #eef2f7; color:#334155; vertical-align:middle; }
 .dark th { background:#0f172a; color:#94a3b8; border-color:#334155; }
 .dark td { color:#cbd5e1; border-color:#334155; }
-tbody tr:hover td { background:#faf5ff; }
-.dark tbody tr:hover td { background:rgba(255,255,255,0.025); }
-tbody tr:last-child td { border-bottom:none; }
-
-/* ── Santri cell ── */
-.santri-cell { display:flex; align-items:center; gap:10px; }
-.santri-avatar {
-    width:34px; height:34px; border-radius:10px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:0.7rem; font-weight:800; color:#fff; flex-shrink:0;
+tbody tr:hover td { background:#f8fafc; }
+.dark tbody tr:hover td { background:rgba(255,255,255,.025); }
+.person { display:flex; align-items:center; gap:10px; min-width:220px; }
+.avatar { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:.74rem; font-weight:800; background:#0f766e; flex-shrink:0; }
+.avatar-pi { background:#be185d; }
+.name { margin:0; color:#0f172a; font-size:.84rem; font-weight:800; }
+.nis { margin:2px 0 0; color:#94a3b8; font-size:.72rem; }
+.chips { display:flex; flex-wrap:wrap; gap:6px; min-width:260px; }
+.chip { display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border-radius:999px; font-size:.68rem; font-weight:800; }
+.chip-ok { color:#166534; background:#dcfce7; }
+.chip-wait { color:#854d0e; background:#fef9c3; }
+.badge { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:999px; font-size:.7rem; font-weight:800; white-space:nowrap; }
+.status-menunggu { color:#475569; background:#f1f5f9; }
+.status-sebagian { color:#854d0e; background:#fef3c7; }
+.status-diizinkan { color:#075985; background:#e0f2fe; }
+.status-keluar { color:#9a3412; background:#ffedd5; }
+.status-kembali { color:#166534; background:#dcfce7; }
+.status-kabur { color:#991b1b; background:#fee2e2; }
+.status-terlambat { color:#be123c; background:#ffe4e6; }
+.empty {
+    padding:48px 20px; text-align:center; border:1.5px dashed #cbd5e1;
+    border-radius:14px; background:#fff;
 }
-.avatar-pa { background:linear-gradient(135deg,#6d28d9,#8b5cf6); }
-.avatar-pi { background:linear-gradient(135deg,#be185d,#ec4899); }
-.santri-name { margin:0; font-weight:700; color:#0f172a; font-size:0.83rem; }
-.dark .santri-name { color:#f8fafc; }
-.santri-nis  { margin:2px 0 0; color:#94a3b8; font-size:0.71rem; }
-
-/* ── Badge ── */
-.badge {
-    display:inline-flex; align-items:center; gap:4px; padding:4px 10px;
-    border-radius:999px; font-size:0.68rem; font-weight:800; white-space:nowrap;
+.dark .empty { background:#1e293b; border-color:#334155; }
+.empty h2 { margin:0 0 6px; color:#0f172a; font-size:1rem; font-weight:800; }
+.dark .empty h2 { color:#f8fafc; }
+.empty p { margin:0 0 16px; color:#64748b; font-size:.84rem; }
+.pagi { padding:14px 16px; border-top:1px solid #e2e8f0; }
+.dark .pagi { border-color:#334155; }
+@media(max-width:1000px) {
+    .stats { grid-template-columns:repeat(3,minmax(120px,1fr)); }
+    .filter-grid { grid-template-columns:1fr 1fr; }
 }
-.badge-aktif    { background:#dbeafe; color:#1d4ed8; }
-.badge-selesai  { background:#f1f5f9; color:#64748b; }
-.badge-belum    { background:#fef9c3; color:#854d0e; }
-.badge-sudah    { background:#dcfce7; color:#166534; }
-.badge-terlambat{ background:#fee2e2; color:#991b1b; }
-
-/* ── Event chip ── */
-.event-chip {
-    display:inline-flex; align-items:center; gap:6px; padding:5px 10px;
-    background:#ede9fe; border-radius:10px; font-size:0.75rem;
-    font-weight:700; color:#5b21b6;
-}
-
-/* ── Empty ── */
-.empty-state {
-    background:#fff; border:1.5px dashed #ddd6fe; border-radius:16px;
-    padding:54px 20px; text-align:center;
-}
-.dark .empty-state { background:#1e293b; border-color:#4c1d95; }
-.empty-icon {
-    width:58px; height:58px; border-radius:16px; background:#ede9fe;
-    display:flex; align-items:center; justify-content:center; margin:0 auto 14px;
-}
-
-/* ── Pagination ── */
-.pagi-wrap { padding:14px 18px; border-top:1px solid #f1f5f9; }
-.dark .pagi-wrap { border-color:#334155; }
-
-/* ── Export note ── */
-.export-bar {
-    display:flex; align-items:center; justify-content:space-between;
-    gap:12px; padding:10px 18px; background:#faf5ff;
-    border-bottom:1px solid #ede9fe; flex-wrap:wrap;
-}
-.dark .export-bar { background:rgba(109,40,217,0.08); border-color:rgba(109,40,217,0.2); }
-.export-bar p { margin:0; font-size:0.77rem; color:#7c3aed; font-weight:600; }
-
-/* ── Responsive ── */
 @media(max-width:700px) {
-    th:nth-child(4), td:nth-child(4),
-    th:nth-child(6), td:nth-child(6) { display:none; }
+    .hero { flex-direction:column; }
+    .stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
     .filter-grid { grid-template-columns:1fr; }
+    th:nth-child(3), td:nth-child(3), th:nth-child(6), td:nth-child(6) { display:none; }
 }
 </style>
 
 @php
-    use App\Models\Santri;
-    $kelasList = Santri::select('kelas')->distinct()->orderBy('kelas')->pluck('kelas');
+    $statusOptions = [
+        'menunggu' => 'Menunggu',
+        'sebagian' => 'Sebagian',
+        'diizinkan' => 'Diizinkan',
+        'keluar' => 'Keluar',
+        'kembali' => 'Kembali',
+        'kabur' => 'Kabur',
+        'terlambat_kembali' => 'Terlambat Kembali',
+    ];
+
+    $statusClass = [
+        'menunggu' => 'status-menunggu',
+        'sebagian' => 'status-sebagian',
+        'diizinkan' => 'status-diizinkan',
+        'keluar' => 'status-keluar',
+        'kembali' => 'status-kembali',
+        'kabur' => 'status-kabur',
+        'terlambat_kembali' => 'status-terlambat',
+    ];
+
+    $approvalLabels = [
+        'musrif' => 'Musrif',
+        'spp' => 'SPP',
+        'keamanan' => 'Keamanan',
+    ];
 @endphp
 
-<div class="page-bg">
-<div class="page-wrap">
+<div class="page">
+    <div class="wrap">
+        @if(session('success'))
+            <div class="alert alert-success"><span>OK</span><div>{{ session('success') }}</div></div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-error"><span>!</span><div>{{ session('error') }}</div></div>
+        @endif
 
-    {{-- Alert --}}
-    @if(session('success'))
-        <div class="alert alert-success"><span>✓</span><div>{{ session('success') }}</div></div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-error"><span>!</span><div>{{ session('error') }}</div></div>
-    @endif
-
-    {{-- Banner --}}
-    <div class="page-banner">
-        <h1>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:20px;height:20px;display:inline;margin-right:6px;vertical-align:-3px;">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/>
-            </svg>
-            Rekap Perpulangan
-        </h1>
-        <p>Pantau daftar santri berdasarkan event perpulangan yang sedang atau sudah berlangsung.</p>
-        <div class="banner-actions">
-            <a href="{{ route('admin.perpulangan.index') }}" class="btn-white">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
-                Kelola Event
-            </a>
-        </div>
-    </div>
-
-    {{-- Statistik --}}
-    <div class="stats-row">
-        <div class="stat-card">
-            <p class="stat-label">Total Santri Rekap</p>
-            <p class="stat-value">{{ $totalSantri }}</p>
-        </div>
-        <div class="stat-card">
-            <p class="stat-label">Belum Kembali</p>
-            <p class="stat-value" style="color:#d97706;">{{ $belumKembali }}</p>
-        </div>
-        <div class="stat-card">
-            <p class="stat-label">Sudah Kembali</p>
-            <p class="stat-value" style="color:#16a34a;">{{ $sudahKembali }}</p>
-        </div>
-        <div class="stat-card">
-            <p class="stat-label">Event Aktif</p>
-            <p class="stat-value" style="color:#7c3aed;">{{ $totalEventAktif }}</p>
-        </div>
-    </div>
-
-    {{-- Filter --}}
-    <div class="filter-card">
-        <form method="GET" action="{{ route('admin.perpulangan.rekap') }}">
-            <div class="filter-grid">
-                <div>
-                    <label class="filter-label">Event Perpulangan</label>
-                    <select name="perpulangan_id" class="filter-select">
-                        <option value="">Semua Event</option>
-                        @foreach($eventList as $event)
-                            <option value="{{ $event->id }}" {{ request('perpulangan_id') == $event->id ? 'selected' : '' }}>
-                                {{ $event->nama_event }}
-                                ({{ $event->tanggal_mulai->format('d/m/Y') }} – {{ $event->batas_kembali->format('d/m/Y') }})
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="filter-label">Kelas</label>
-                    <select name="kelas" class="filter-select">
-                        <option value="">Semua Kelas</option>
-                        @foreach($kelasList as $k)
-                            <option value="{{ $k }}" {{ request('kelas') === $k ? 'selected' : '' }}>{{ $k }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="filter-label">Status Kembali</label>
-                    <select name="status_kembali" class="filter-select">
-                        <option value="">Semua Status</option>
-                        <option value="belum" {{ request('status_kembali') === 'belum' ? 'selected' : '' }}>Belum Kembali</option>
-                        <option value="sudah" {{ request('status_kembali') === 'sudah' ? 'selected' : '' }}>Sudah Kembali</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="filter-label">Cari Nama / NIS</label>
-                    <input type="text" name="search" class="filter-input" placeholder="Nama atau NIS..." value="{{ request('search') }}">
-                </div>
-                <div style="display:flex;gap:8px;align-items:flex-end;">
-                    <button type="submit" class="btn-action" style="flex:1;">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803 7.5 7.5 0 0016.803 15.803z"/></svg>
-                        Filter
-                    </button>
-                    <a href="{{ route('admin.perpulangan.rekap') }}" class="btn-soft">Reset</a>
-                </div>
-            </div>
-        </form>
-    </div>
-
-    {{-- Tabel --}}
-    @if($santriList->isEmpty())
-        <div class="empty-state">
-            <div class="empty-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#7c3aed" style="width:26px;height:26px;">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/>
-                </svg>
-            </div>
-            <p style="font-weight:800;color:#0f172a;margin:0 0 6px;">Tidak ada data santri</p>
-            <p style="color:#94a3b8;font-size:0.82rem;margin:0 0 16px;">
-                @if(request()->hasAny(['perpulangan_id','kelas','status_kembali','search']))
-                    Tidak ada hasil untuk filter yang dipilih.
-                @else
-                    Belum ada data santri yang tercatat dalam event perpulangan.
-                @endif
-            </p>
-            @if(request()->hasAny(['perpulangan_id','kelas','status_kembali','search']))
-                <a href="{{ route('admin.perpulangan.rekap') }}" class="btn-soft">Tampilkan Semua</a>
-            @else
-                <a href="{{ route('admin.perpulangan.index') }}" class="btn-primary" style="color:#4c1d95;">Kelola Event Perpulangan</a>
-            @endif
-        </div>
-    @else
-        <div class="table-card">
-            <div class="export-bar">
+        <section class="hero">
+            <div>
+                <h1>Rekap Perpulangan</h1>
                 <p>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:4px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/>
-                    </svg>
-                    Menampilkan <strong>{{ $santriList->total() }}</strong> santri
-                    @if(request('perpulangan_id'))
-                        · Event: <strong>{{ $eventList->firstWhere('id', request('perpulangan_id'))?->nama_event }}</strong>
-                    @endif
-                    @if(request('kelas'))
-                        · Kelas: <strong>{{ request('kelas') }}</strong>
-                    @endif
+                    Pantau status approval, santri yang sudah keluar, dan santri yang sudah kembali untuk event perpulangan.
                 </p>
             </div>
-
-            <div class="table-head">
-                <div>
-                    <h2>Daftar Santri Perpulangan</h2>
-                    <p>{{ $santriList->total() }} santri ditemukan</p>
-                </div>
+            <div class="hero-actions">
+                <a href="{{ route('admin.perpulangan.index') }}" class="btn btn-soft">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>
+                    Kelola Event
+                </a>
+                <a href="{{ route('perpulangan.scan.musrif') }}" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                    Scan Approval
+                </a>
             </div>
+        </section>
 
-            <div style="overflow-x:auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Santri</th>
-                            <th>Kelas</th>
-                            <th>Event Perpulangan</th>
-                            <th>Batas Kembali</th>
-                            <th>Status Kembali</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($santriList as $i => $row)
-                        @php
-                            $santri = $row['santri'];
-                            $event  = $row['event'];
-                            $sudah  = $row['sudah_kembali'];
-                            $terlambat = $row['terlambat'];
-                            $initials = collect(explode(' ', $santri->nama))->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->join('');
-                            $isPA = str_starts_with($santri->kelas ?? '', 'PA');
-                        @endphp
-                        <tr>
-                            <td style="color:#94a3b8;font-weight:700;font-size:0.75rem;">{{ $santriList->firstItem() + $i }}</td>
-                            <td>
-                                <div class="santri-cell">
-                                    <div class="santri-avatar {{ $isPA ? 'avatar-pa' : 'avatar-pi' }}">{{ $initials }}</div>
-                                    <div>
-                                        <p class="santri-name">{{ $santri->nama }}</p>
-                                        <p class="santri-nis">{{ $santri->nis }}</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <span style="font-weight:700;color:#334155;">{{ $santri->kelas ?? '-' }}</span>
-                            </td>
-                            <td>
-                                <span class="event-chip">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:12px;height:12px;">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0110.5 3h6a2.25 2.25 0 012.25 2.25v13.5A2.25 2.25 0 0116.5 21h-6a2.25 2.25 0 01-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25"/>
-                                    </svg>
-                                    {{ Str::limit($event->nama_event, 30) }}
-                                </span>
-                            </td>
-                            <td>
-                                <span style="font-weight:600;color:{{ now()->gt($event->batas_kembali) && !$sudah ? '#dc2626' : '#334155' }}">
-                                    {{ $event->batas_kembali->translatedFormat('d M Y') }}
-                                </span>
-                                @if(now()->gt($event->batas_kembali) && !$sudah)
-                                    <br><span style="font-size:0.68rem;color:#dc2626;font-weight:700;">Melewati batas!</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if($sudah && $terlambat)
-                                    <span class="badge badge-terlambat">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 6" fill="currentColor" style="width:6px;height:6px;"><circle cx="3" cy="3" r="3"/></svg>
-                                        Terlambat Kembali
-                                    </span>
-                                @elseif($sudah)
-                                    <span class="badge badge-sudah">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 6" fill="currentColor" style="width:6px;height:6px;"><circle cx="3" cy="3" r="3"/></svg>
-                                        Sudah Kembali
-                                    </span>
-                                @else
-                                    <span class="badge badge-belum">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 6" fill="currentColor" style="width:6px;height:6px;"><circle cx="3" cy="3" r="3"/></svg>
-                                        Belum Kembali
-                                    </span>
-                                @endif
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+        <section class="stats">
+            <div class="stat"><p class="stat-label">Total</p><p class="stat-value">{{ $stats['total'] ?? 0 }}</p></div>
+            <div class="stat"><p class="stat-label">Menunggu</p><p class="stat-value" style="color:#475569;">{{ $stats['menunggu'] ?? 0 }}</p></div>
+            <div class="stat"><p class="stat-label">Sebagian</p><p class="stat-value" style="color:#d97706;">{{ $stats['sebagian'] ?? 0 }}</p></div>
+            <div class="stat"><p class="stat-label">Diizinkan</p><p class="stat-value" style="color:#0284c7;">{{ $stats['diizinkan'] ?? 0 }}</p></div>
+            <div class="stat"><p class="stat-label">Keluar</p><p class="stat-value" style="color:#ea580c;">{{ $stats['keluar'] ?? 0 }}</p></div>
+            <div class="stat"><p class="stat-label">Kembali</p><p class="stat-value" style="color:#16a34a;">{{ $stats['kembali'] ?? 0 }}</p></div>
+            <div class="stat"><p class="stat-label">Kabur</p><p class="stat-value" style="color:#dc2626;">{{ $stats['kabur'] ?? 0 }}</p></div>
+            <div class="stat"><p class="stat-label">Terlambat</p><p class="stat-value" style="color:#be123c;">{{ $stats['terlambat_kembali'] ?? 0 }}</p></div>
+        </section>
 
-            @if($santriList->hasPages())
-                <div class="pagi-wrap">
-                    {{ $santriList->appends(request()->query())->links() }}
+        <section class="panel">
+            <form method="GET" action="{{ route('admin.perpulangan.rekap') }}">
+                <div class="filter-grid">
+                    <div>
+                        <label class="label">Event</label>
+                        <select name="perpulangan_id" class="select">
+                            <option value="">Event aktif / terbaru</option>
+                            @foreach($eventList as $event)
+                                <option value="{{ $event->id }}" @selected((string) request('perpulangan_id') === (string) $event->id)>
+                                    {{ $event->nama_event }} ({{ $event->tanggal_mulai->format('d/m/Y') }} - {{ $event->batas_kembali->format('d/m/Y') }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="label">Kelas</label>
+                        <select name="kelas" class="select">
+                            <option value="">Semua kelas</option>
+                            @foreach($kelasList as $kelas)
+                                <option value="{{ $kelas }}" @selected(request('kelas') === $kelas)>{{ $kelas }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="label">Status</label>
+                        <select name="status" class="select">
+                            <option value="">Semua status</option>
+                            @foreach($statusOptions as $value => $label)
+                                <option value="{{ $value }}" @selected(request('status') === $value)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="label">Cari</label>
+                        <input type="text" name="search" value="{{ request('search') }}" class="input" placeholder="Nama atau NIS">
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <button type="submit" class="btn btn-info" style="flex:1;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35m0 0A7.5 7.5 0 1 0 6.05 6.05a7.5 7.5 0 0 0 10.6 10.6Z"/></svg>
+                            Filter
+                        </button>
+                        <a href="{{ route('admin.perpulangan.rekap') }}" class="btn btn-soft">Reset</a>
+                    </div>
                 </div>
-            @endif
-        </div>
-    @endif
+            </form>
+        </section>
 
-</div>
+        @if($santriList->isEmpty())
+            <section class="empty">
+                <h2>Belum ada data rekap</h2>
+                <p>
+                    @if($activeEvent)
+                        Tidak ada santri yang cocok dengan filter pada event {{ $activeEvent->nama_event }}.
+                    @else
+                        Belum ada event perpulangan yang bisa direkap.
+                    @endif
+                </p>
+                <a href="{{ route('admin.perpulangan.index') }}" class="btn btn-primary">Kelola Event</a>
+            </section>
+        @else
+            <section class="table-card">
+                <div class="table-head">
+                    <div>
+                        <h2 class="section-title">Daftar Santri</h2>
+                        <p class="muted">
+                            Menampilkan {{ $santriList->firstItem() }}-{{ $santriList->lastItem() }} dari {{ $santriList->total() }} data
+                        </p>
+                    </div>
+                    @if($activeEvent)
+                        <div class="event-pill">{{ $activeEvent->nama_event }}</div>
+                    @endif
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Santri</th>
+                                <th>Kelas</th>
+                                <th>Approval</th>
+                                <th>Status</th>
+                                <th>Waktu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($santriList as $index => $row)
+                                @php
+                                    $santri = $row->santri;
+                                    $approvals = $row->approvals->keyBy('approval_type');
+                                    $nama = $santri?->nama ?? 'Santri tidak ditemukan';
+                                    $nis = $row->nis;
+                                    $kelas = $santri?->kelas ?? '-';
+                                    $initials = collect(explode(' ', $nama))
+                                        ->filter()
+                                        ->map(fn ($word) => strtoupper(substr($word, 0, 1)))
+                                        ->take(2)
+                                        ->join('');
+                                    $isPa = str_starts_with($kelas, 'PA');
+                                @endphp
+                                <tr>
+                                    <td style="color:#94a3b8;font-weight:800;">{{ $santriList->firstItem() + $index }}</td>
+                                    <td>
+                                        <div class="person">
+                                            <div class="avatar {{ $isPa ? '' : 'avatar-pi' }}">{{ $initials ?: '?' }}</div>
+                                            <div>
+                                                <p class="name">{{ $nama }}</p>
+                                                <p class="nis">NIS {{ $nis }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><strong>{{ $kelas }}</strong></td>
+                                    <td>
+                                        <div class="chips">
+                                            @foreach($approvalLabels as $type => $label)
+                                                @if($approvals->has($type))
+                                                    <span class="chip chip-ok">{{ $label }}: {{ $approvals[$type]->approvedBy->name ?? '-' }}</span>
+                                                @else
+                                                    <span class="chip chip-wait">{{ $label }}: belum</span>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge {{ $statusClass[$row->status] ?? 'status-menunggu' }}">
+                                            {{ $row->status_label }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div style="font-size:.76rem;line-height:1.7;">
+                                            <div>Keluar: <strong>{{ optional($row->keluar_at)->format('d/m/Y H:i') ?? '-' }}</strong></div>
+                                            <div>Kembali: <strong>{{ optional($row->kembali_at)->format('d/m/Y H:i') ?? '-' }}</strong></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                @if($santriList->hasPages())
+                    <div class="pagi">
+                        {{ $santriList->appends(request()->query())->links() }}
+                    </div>
+                @endif
+            </section>
+        @endif
+    </div>
 </div>
 </x-app-layout>

@@ -187,8 +187,13 @@ function renderCard(d) {
                     + chipHtml('SPP', d.approvals.spp)
                     + chipHtml('Keamanan', d.approvals.keamanan);
     const sudah = !!d.approvals.spp;
-    document.getElementById('already-notice').style.display = sudah ? 'block' : 'none';
-    document.getElementById('form-section').style.display   = sudah ? 'none'  : 'block';
+    const approvalClosed = !d.approval_open;
+    const notice = document.getElementById('already-notice');
+    notice.textContent = approvalClosed
+        ? `Approval hanya dibuka pada tanggal ${d.event.tanggal_mulai}.`
+        : '✅ Santri ini sudah mendapat TTD SPP/kantor.';
+    notice.style.display = (sudah || approvalClosed) ? 'block' : 'none';
+    document.getElementById('form-section').style.display   = (sudah || approvalClosed) ? 'none'  : 'block';
     document.getElementById('santri-result').style.display  = 'block';
     document.getElementById('santri-result').scrollIntoView({behavior:'smooth',block:'nearest'});
 }

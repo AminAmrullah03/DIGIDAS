@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Artisan;
 use App\Models\Izin;
 use App\Models\IzinPulang;
+use App\Models\Perpulangan;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -35,3 +36,19 @@ Artisan::command('izin-pulang:tandai-kabur', function () {
 })->purpose('Tandai izin pulang sebagai Kabur setelah lebih dari 1 hari melewati tenggat');
 
 Schedule::command('izin-pulang:tandai-kabur')->everyMinute();
+
+Artisan::command('perpulangan:sinkron-status', function () {
+    $result = ['kabur' => 0, 'terlambat_kembali' => 0];
+
+    Perpulangan::aktif()->chunkById(50, function ($events) use (&$result) {
+        foreach ($events as $event) {
+            $synced = $event->sinkronkanStatusOtomatis();
+            $result['kabur'] += $synced['kabur'];
+            $result['terlambat_kembali'] += $synced['terlambat_kembali'];
+        }
+    });
+
+    $this->info("{$result['kabur']} santri ditandai kabur, {$result['terlambat_kembali']} santri ditandai terlambat kembali.");
+})->purpose('Sinkronkan status otomatis perpulangan massal');
+
+Schedule::command('perpulangan:sinkron-status')->everyMinute();

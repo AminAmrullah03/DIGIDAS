@@ -63,7 +63,7 @@ class PerpulanganController extends Controller
     {
         $perpulanganId = $request->input('perpulangan_id');
         $kelasFilter   = $request->input('kelas');
-        $statusFilter  = $request->input('status'); // menunggu|sebagian|diizinkan|keluar|kembali
+        $statusFilter  = $request->input('status'); // menunggu|sebagian|diizinkan|keluar|kembali|kabur|terlambat_kembali
         $search        = $request->input('search');
 
         $eventList = Perpulangan::orderByDesc('tanggal_mulai')->get();
@@ -74,6 +74,11 @@ class PerpulanganController extends Controller
         } else {
             $activeEvent = Perpulangan::aktif()->orderByDesc('tanggal_mulai')->first()
                 ?? $eventList->first();
+        }
+
+        if ($activeEvent && $activeEvent->status === Perpulangan::STATUS_AKTIF) {
+            $activeEvent->daftarkanSemuaSantri();
+            $activeEvent->sinkronkanStatusOtomatis();
         }
 
         $query = PerpulanganSantri::with(['santri', 'approvals.approvedBy'])
@@ -94,16 +99,19 @@ class PerpulanganController extends Controller
             });
         }
 
+        $baseRows = PerpulanganSantri::where('perpulangan_id', optional($activeEvent)->id)->get();
         $rows = $query->get();
 
         // Statistik
         $stats = [
-            'total'     => $rows->count(),
-            'menunggu'  => $rows->where('status', 'menunggu')->count(),
-            'sebagian'  => $rows->where('status', 'sebagian')->count(),
-            'diizinkan' => $rows->where('status', 'diizinkan')->count(),
-            'keluar'    => $rows->where('status', 'keluar')->count(),
-            'kembali'   => $rows->where('status', 'kembali')->count(),
+            'total'     => $baseRows->count(),
+            'menunggu'  => $baseRows->where('status', PerpulanganSantri::STATUS_MENUNGGU)->count(),
+            'sebagian'  => $baseRows->where('status', PerpulanganSantri::STATUS_SEBAGIAN)->count(),
+            'diizinkan' => $baseRows->where('status', PerpulanganSantri::STATUS_DIIZINKAN)->count(),
+            'keluar'    => $baseRows->where('status', PerpulanganSantri::STATUS_KELUAR)->count(),
+            'kembali'   => $baseRows->where('status', PerpulanganSantri::STATUS_KEMBALI)->count(),
+            'kabur'     => $baseRows->where('status', PerpulanganSantri::STATUS_KABUR)->count(),
+            'terlambat_kembali' => $baseRows->where('status', PerpulanganSantri::STATUS_TERLAMBAT_KEMBALI)->count(),
         ];
 
         // Pagination manual
